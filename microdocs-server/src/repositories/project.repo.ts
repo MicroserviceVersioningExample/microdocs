@@ -1,6 +1,6 @@
 
-import { BaseRepository } from "../common/base.repo";
-import { Project } from "./project.model";
+import { BaseRepository } from "../repositories/base.repo";
+import { Project } from "@maxxton/microdocs-core";
 
 /**
  * Project Repository
