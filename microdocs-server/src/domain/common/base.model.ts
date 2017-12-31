@@ -1,6 +1,4 @@
-
 import { IsNotEmpty, Matches, MaxLength, validate as validateClass, ValidationError } from "class-validator";
-import { Unique } from "./unique.validator";
 
 /**
  * Base model
@@ -12,8 +10,7 @@ export class BaseModel {
   @IsNotEmpty()
   @MaxLength(30)
   @Matches(/^[a-z][a-z0-9-]*$/)
-  @Unique()
-  public name: string;
+  public id: string;
 
   /**
    * Create new model
@@ -29,7 +26,7 @@ export class BaseModel {
    */
   public edit(options: BaseOptions) {
     if (options) {
-      this.name = options.name ? options.name.toLowerCase() : undefined;
+      this.id = options.id ? options.id.toLowerCase() : undefined;
     }
   }
 
@@ -60,6 +57,6 @@ export class BaseModel {
 
 export interface BaseOptions {
 
-  name: string;
+  id: string;
 
 }

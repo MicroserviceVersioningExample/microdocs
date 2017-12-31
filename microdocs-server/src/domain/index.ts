@@ -1,3 +1,3 @@
-
 export * from "./common";
-export * from "./projects";
+export * from "./projects/project.model";
+export * from "./repos/repo.model";

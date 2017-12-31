@@ -5,7 +5,6 @@ import { Container } from "typedi";
 import * as winston from "winston";
 import { web } from "./property-keys";
 import { Settings } from "./settings";
-import { ProjectController } from "../controllers/project.controller";
 
 /**
  * Configure the HTTP server
@@ -17,7 +16,9 @@ export class WebConfig {
     useContainer(Container);
     // creates express app, registers all controller routes and returns you express app instance
     const app = createExpressServer({
-      controllers: [__dirname + "/../controllers/**/*.controller.js"]
+      cors: true,
+      controllers: [__dirname + "/../controllers/**/*.controller.js"],
+      middlewares: [__dirname + "/../middlewares/**/*.middleware.js"]
     });
 
     // Health check

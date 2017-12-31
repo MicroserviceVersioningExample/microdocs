@@ -1,6 +1,6 @@
 
+import { Project } from "../domain/projects/project.model";
 import { BaseRepository } from "../repositories/base.repo";
-import { Project } from "@maxxton/microdocs-core";
 
 /**
  * Project Repository

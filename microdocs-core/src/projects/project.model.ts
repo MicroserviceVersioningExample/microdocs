@@ -31,7 +31,7 @@ export class Project extends BaseModel {
   }
 
   get displayName(): string {
-    return this.displayName;
+    return this._displayName;
   }
 
 }

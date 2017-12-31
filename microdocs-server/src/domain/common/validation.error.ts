@@ -8,10 +8,8 @@ import { ValidationError } from "class-validator";
  */
 export class ValidationException extends Error {
 
-  constructor(message: string, private validationErrors: ValidationError[]) {
+  constructor(message: string, public errors: ValidationError[]) {
     super(message);
   }
-
-
 
 }

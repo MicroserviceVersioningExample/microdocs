@@ -1,5 +1,9 @@
+import {
+  Body, Delete, Get, JsonController, NotFoundError, OnNull, OnUndefined, Param, Post,
+  Put
+} from "routing-controllers";
+import { Stream } from "stream";
 import { Project, ProjectOptions } from "../domain";
-import { Body, Delete, Get, JsonController, NotFoundError, OnNull, Param, Post, Put } from "routing-controllers";
 import { ProjectService } from "../services/project.service";
 
 @JsonController("/api/v2")
@@ -13,19 +17,19 @@ export class ProjectController {
    * @returns {Promise<Project[]>}
    */
   @Get("/projects")
-  public getProjects(): Promise<Project[]> {
-    return this.projectService.getAll();
+  public getProjects(): Stream {
+    return this.projectService.getAllAsStream();
   }
 
   /**
-   * Get project by name
-   * @param {string} name
+   * Get project by id
+   * @param {string} id
    * @returns {Promise<Project>}
    */
-  @Get("/projects/:name")
+  @Get("/projects/:id")
   @OnNull(404)
-  public getProject(@Param("name") name: string): Promise<Project> {
-    return this.projectService.getByName(name);
+  public getProject(@Param("id") id: string): Promise<Project> {
+    return this.projectService.getById(id);
   }
 
   /**
@@ -40,20 +44,35 @@ export class ProjectController {
 
   /**
    * Edit or create project
-   * @param {string} name
+   * @param {string} id
    * @param {ProjectOptions} project
    * @returns {Promise<Project>}
    */
-  @Put("/projects/:name")
-  public editProject(@Param("name") name: string, @Body() project: ProjectOptions): Promise<Project> {
-    return this.projectService.editOrCreate(name, project);
+  @Put("/projects/:id")
+  public editProject(@Param("id") id: string, @Body() project: ProjectOptions): Promise<Project> {
+    return this.projectService.editOrCreate(id, project);
   }
 
-  @Delete("/projects/:name")
-  public async deleteProject(@Param("name") name: string): Promise<void> {
-    if (!await this.projectService.delete(name)) {
+  /**
+   * Delete a project
+   * @param {string} id
+   * @returns {Promise<void>}
+   */
+  @Delete("/projects/:id")
+  @OnUndefined(204)
+  public async deleteProject(@Param("id") id: string): Promise<void> {
+    if (!await this.projectService.delete(id)) {
       throw new NotFoundError();
     }
+  }
+
+  /**
+   * Patch a project
+   * @param {string} id
+   * @returns {Promise<Project>}
+   */
+  public patchProject(@Param("id") id: string): Promise<Project> {
+    return null;
   }
 
 }

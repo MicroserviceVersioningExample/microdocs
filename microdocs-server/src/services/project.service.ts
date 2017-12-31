@@ -1,7 +1,7 @@
-import { BaseService } from "./base.service";
-import { Project, ProjectOptions } from "@maxxton/microdocs-core";
-import { ProjectRepository } from "../repositories/project.repo";
 import { Inject, Service } from "typedi";
+import { Project, ProjectOptions } from "../domain/projects/project.model";
+import { ProjectRepository } from "../repositories/project.repo";
+import { BaseService } from "./base.service";
 
 /**
  * Project Service

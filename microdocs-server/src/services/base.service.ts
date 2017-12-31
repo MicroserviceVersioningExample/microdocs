@@ -1,14 +1,17 @@
 import { ValidationError } from "class-validator";
-import { Observable } from "rxjs/Observable";
-import { BaseModel, BaseOptions, ValidationException } from "@maxxton/microdocs-core";
+import { Stream } from "stream";
+import { BaseModel, BaseOptions } from "../domain/common/base.model";
+import { ValidationException } from "../domain/common/validation.error";
 import { BaseRepository } from "../repositories/base.repo";
+import * as winston from "winston";
 
 /**
  * Basic CRUD Service
  *
  * @author S. Hermans <s.hermans@maxxton.com
  */
-export class BaseService<T extends BaseModel, O extends BaseOptions> {
+export class BaseService<T extends BaseModel, O extends BaseOptions, P1 extends BaseModel = BaseModel,
+  P2 extends BaseModel = BaseModel> {
 
   /**
    * Create Base Service
@@ -21,14 +24,16 @@ export class BaseService<T extends BaseModel, O extends BaseOptions> {
 
   /**
    * Edit or create a new model
-   * @param {string} name
+   * @param {string} id
    * @param {O} options
+   * @param p1 first parent
+   * @param p2 second parent
    * @returns {Promise<T extends BaseModel>}
    */
-  public async editOrCreate(name: string, options: O):Promise<T> {
-    let model = await this.edit(name, options);
-    if(!model){
-      model = await this.create(options);
+  public async editOrCreate(id: string, options: O, p1?: P1, p2?: P2): Promise<T> {
+    let model = await this.edit(id, options, p1, p2);
+    if (!model) {
+      model = await this.create(options, p1, p2);
     }
     return model;
   }
@@ -36,9 +41,11 @@ export class BaseService<T extends BaseModel, O extends BaseOptions> {
   /**
    * Create new model
    * @param {O} options
+   * @param p1 first parent
+   * @param p2 second parent
    * @returns {Promise<T extends BaseModel>}
    */
-  public async create(options: O): Promise<T> {
+  public async create(options: O, p1?: P1, p2?: P2): Promise<T> {
     let model = new this.modelClass(options);
 
     // Validate model
@@ -47,32 +54,34 @@ export class BaseService<T extends BaseModel, O extends BaseOptions> {
       throw new ValidationException("Project is invalid", errors);
     }
 
-    // Check if name is unique
-    if (await this.baseRepository.exists(model.name)) {
+    // Check if id is unique
+    if (await this.baseRepository.exists(model.id, p1, p2)) {
       let error = new ValidationError();
       error.target = model;
-      error.property = "name";
-      error.value = model.name;
+      error.property = "id";
+      error.value = model.id;
       error.constraints = {
-        NameNotUnique: "Name is not unique"
+        IdNotUnique: "Id is not unique"
       };
 
       throw new ValidationException("Model is invalid", [error]);
     }
 
     // save and return model
-    return await this.baseRepository.save(model);
+    return this.baseRepository.save(model, p1, p2);
   }
 
   /**
    * Edit model
-   * @param name
+   * @param id
    * @param {O} options
+   * @param p1 first parent
+   * @param p2 second parent
    * @returns {Promise<T extends BaseModel>}
    */
-  public async edit(name: string, options: O): Promise<T | null> {
+  public async edit(id: string, options: O, p1?: P1, p2?: P2): Promise<T | null> {
     // Load model
-    let model = await this.baseRepository.find(name.toLowerCase());
+    let model = await this.baseRepository.find(id.toLowerCase(), p1, p2);
     if (!model) {
       return null;
     }
@@ -84,16 +93,16 @@ export class BaseService<T extends BaseModel, O extends BaseOptions> {
       throw new ValidationException("Project is invalid", errors);
     }
 
-    // Check if name is unique
-    let nameEdited = options.name && name.toLowerCase() !== model.name.toLowerCase();
-    if (nameEdited) {
-      if (await this.baseRepository.exists(model.name)) {
+    // Check if id is unique
+    let idEdited = options.id && id.toLowerCase() !== model.id.toLowerCase();
+    if (idEdited) {
+      if (await this.baseRepository.exists(model.id, p1, p2)) {
         let error = new ValidationError();
         error.target = model;
-        error.property = "name";
-        error.value = model.name;
+        error.property = "id";
+        error.value = model.id;
         error.constraints = {
-          NameNotUnique: "Name is not unique"
+          IdNotUnique: "Id is not unique"
         };
 
         throw new ValidationException("Model is invalid", [error]);
@@ -101,9 +110,9 @@ export class BaseService<T extends BaseModel, O extends BaseOptions> {
     }
 
     // Store model
-    let newModel = await this.baseRepository.find(model.name);
-    if (nameEdited) {
-      await this.baseRepository.delete(name);
+    let newModel = await this.baseRepository.find(model.id, p1, p2);
+    if (idEdited) {
+      await this.baseRepository.delete(id, p1, p2);
     }
 
     return newModel;
@@ -111,48 +120,58 @@ export class BaseService<T extends BaseModel, O extends BaseOptions> {
 
   /**
    * Delete model
-   * @param {string} name
+   * @param {string} id
+   * @param p1 first parent
+   * @param p2 second parent
    * @returns {Promise<boolean>}
    */
-  public async delete(name: string): Promise<boolean> {
-    if (await this.baseRepository.exists(name)) {
-      await this.baseRepository.delete(name);
+  public async delete(id: string, p1?: P1, p2?: P2): Promise<boolean> {
+    if (await this.baseRepository.exists(id, p1, p2)) {
+      await this.baseRepository.delete(id, p1, p2);
       return true;
     }
     return false;
   }
 
   /**
-   * Get model by name
-   * @param {string} name
+   * Get model by id
+   * @param {string} id
+   * @param p1 first parent
+   * @param p2 second parent
    * @returns {Promise<T extends BaseModel>}
    */
-  public getByName(name: string): Promise<T> {
-    return this.baseRepository.find(name);
+  public getById(id: string, p1?: P1, p2?: P2): Promise<T> {
+    return this.baseRepository.find(id, p1, p2);
   }
 
   /**
    * Get all models
+   * @param p1 first parent
+   * @param p2 second parent
    * @returns {Promise<T[]>}
    */
-  public getAll(): Promise<T[]> {
-    return this.baseRepository.findAll();
+  public getAll(p1?: P1, p2?: P2): Promise<T[]> {
+    return this.baseRepository.findAll(p1, p2);
   }
 
   /**
    * Get all models as serial stream
-   * @returns {Observable<T extends BaseModel>}
+   * @param p1 first parent
+   * @param p2 second parent
+   * @returns {Stream}
    */
-  public getAllAsStream(): Observable<T> {
-    return this.baseRepository.findAllAsStream();
+  public getAllAsStream(p1?: P1, p2?: P2): Stream {
+    return this.baseRepository.findAllAsStream(p1, p2);
   }
 
   /**
    * Get all ids
-   * @returns {Promise<string[]>}
+   * @returns {Promise<st
+   * @param p1 first parent
+   * @param p2 second parentring[]>}
    */
-  public getAllIds(): Promise<string[]> {
-    return this.baseRepository.findAllIds();
+  public getAllIds(p1?: P1, p2?: P2): Promise<string[]> {
+    return this.baseRepository.findAllIds(p1, p2);
   }
 
 }

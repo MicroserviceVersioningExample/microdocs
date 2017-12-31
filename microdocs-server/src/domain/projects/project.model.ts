@@ -1,5 +1,5 @@
 import { MaxLength } from "class-validator";
-import { BaseModel } from "../common/base.model";
+import { BaseModel, BaseOptions } from "../common/base.model";
 
 /**
  * /api/v2/projects
@@ -9,7 +9,7 @@ import { BaseModel } from "../common/base.model";
 export class Project extends BaseModel {
 
   @MaxLength(40)
-  private displayName: string;
+  private name: string;
 
   /**
    * Create new project
@@ -26,15 +26,14 @@ export class Project extends BaseModel {
   public edit(options: ProjectOptions) {
     super.edit(options);
     if (options) {
-      this.displayName = options.displayName || options.name;
+      this.name = options.name || options.id;
     }
   }
 
 }
 
-export interface ProjectOptions {
+export interface ProjectOptions extends BaseOptions{
 
-  name: string;
-  displayName?: string;
+  name?: string;
 
 }

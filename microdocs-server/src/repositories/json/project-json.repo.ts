@@ -1,6 +1,6 @@
-import { Project, ProjectOptions } from "@maxxton/microdocs-core";
-import { BaseJsonRepository } from "./base-json.repo";
+import { Project, ProjectOptions } from "../../domain/projects/project.model";
 import { ProjectRepository } from "../project.repo";
+import { BaseJsonRepository } from "./base-json.repo";
 
 export class ProjectJsonRepository extends BaseJsonRepository<Project> implements ProjectRepository {
 

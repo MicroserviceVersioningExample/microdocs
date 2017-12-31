@@ -1,11 +1,11 @@
-import { BaseModel } from "@maxxton/microdocs-core";
 import * as fs from "fs";
 import mkdirp = require("mkdirp");
 import * as pathUtil from "path";
-import { Observable } from "rxjs/Observable";
+import { Readable, Stream } from "stream";
 import * as winston from "winston";
 import { storage } from "../../config/property-keys";
 import { Settings } from "../../config/settings";
+import { BaseModel } from "../../domain/common/base.model";
 import { BaseRepository } from "../base.repo";
 
 /**
@@ -13,16 +13,19 @@ import { BaseRepository } from "../base.repo";
  *
  * @author S. Hermans <s.hermans@maxxton.com
  */
-export abstract class BaseJsonRepository<T extends BaseModel> implements BaseRepository<T> {
+export abstract class BaseJsonRepository<T extends BaseModel, P1 extends BaseModel = BaseModel,
+  P2 extends BaseModel = BaseModel> implements BaseRepository<T, P1, P2> {
 
   private subPath: string;
   private storageFolder: string;
 
   /**
    * Create new CRUD Json repository
+   * @param p1Type first parent
+   * @param p2Type second parent
    * @param {string} subPath in the storage folder
    */
-  constructor(subPath: string) {
+  constructor(subPath: string, private p1Type?: (new (o: any) => P1), private p2Type?: (new (o: any) => P2)) {
     this.subPath = subPath;
     this.storageFolder = pathUtil.join(process.cwd(), Settings.get<string>(storage.json.folder, "database"), subPath);
   }
@@ -30,13 +33,14 @@ export abstract class BaseJsonRepository<T extends BaseModel> implements BaseRep
   /**
    * Check if document exists
    * @param {string} id
+   * @param p1 first parent
+   * @param p2 second parent
    * @returns {Promise<boolean>}
    */
-  public exists(id: string): Promise<boolean> {
+  public exists(id: string, p1?: P1, p2?: P2): Promise<boolean> {
+    let filePath = this.getFilePath(p1, p2, id);
     return new Promise((resolve, reject) => {
       try {
-        let filePath = pathUtil.join(this.storageFolder, id.toLowerCase() + this.getExt());
-
         // Check if file exists
         fs.exists(filePath, exists => {
           resolve(exists);
@@ -50,12 +54,14 @@ export abstract class BaseJsonRepository<T extends BaseModel> implements BaseRep
   /**
    * Find document by id
    * @param {string} id
+   * @param p1 first parent
+   * @param p2 second parent
    * @returns {Promise<T>}
    */
-  public find(id: string): Promise<T> {
+  public find(id: string, p1?: P1, p2?: P2): Promise<T> {
+    let filePath = this.getFilePath(p1, p2, id);
     return new Promise((resolve, reject) => {
       try {
-        let filePath = pathUtil.join(this.storageFolder, id.toLowerCase() + this.getExt());
         winston.silly("[repo: " + this.subPath + "] load document: " + id);
 
         fs.exists(filePath, exists => {
@@ -79,13 +85,15 @@ export abstract class BaseJsonRepository<T extends BaseModel> implements BaseRep
   }
 
   /**
-   * Fin all document ids
+   * Find all document ids
+   * @param p1 first parent
+   * @param p2 second parent
    * @returns {Promise<string[]>}
    */
-  public findAllIds(): Promise<string[]> {
+  public findAllIds(p1?: P1, p2?: P2): Promise<string[]> {
+    let folder = this.getFilePath(p1, p2);
     return new Promise((resolve, reject) => {
       try {
-        let folder = pathUtil.join(this.storageFolder);
         fs.exists(folder, exists => {
           if (exists) {
             fs.readdir(folder, (err, fileNames) => {
@@ -110,51 +118,72 @@ export abstract class BaseJsonRepository<T extends BaseModel> implements BaseRep
 
   /**
    * Find all documents
+   * @param p1 first parent
+   * @param p2 second parent
    * @returns {Promise<T[]>}
    */
-  public async findAll(): Promise<T[]> {
-    let ids = await this.findAllIds();
-    let promises = ids.map(id => this.find(id));
+  public async findAll(p1?: P1, p2?: P2): Promise<T[]> {
+    let ids = await this.findAllIds(p1, p2);
+    let promises = ids.map(id => this.find(id, p1, p2));
     return Promise.all(promises);
   }
 
   /**
-   * Find all documents as Observable stream
-   * @returns {Observable<T>}
+   * Find all documents as stream
+   * @param p1 first parent
+   * @param p2 second parent
+   * @returns {Stream}
    */
-  public findAllAsStream(): Observable<T> {
-    return new Observable(observer => {
-      this.findAllIds().then(ids => {
-
-        let index = 0;
-        let next = () => {
-          index++;
-          if (index >= ids.length) {
-            observer.complete();
-          } else {
-            this.find(ids[index])
-              .then(model => {
-                observer.next(model);
-                next();
-              }).catch(error => observer.error(error));
-          }
-        };
-        next();
-
-      }).catch(error => observer.error(error));
-    });
+  public findAllAsStream(p1?: P1, p2?: P2): Stream {
+    let stream = new Readable();
+    let reading = false;
+    stream._read = () => {
+      if (!reading) {
+        reading = true;
+        this.findAllIds(p1, p2).then(ids => {
+          stream.push("[\n");
+          let index = 0;
+          let next = () => {
+            index++;
+            if (index > ids.length) {
+              stream.push("]");
+              stream.push(null);
+            } else {
+              this.find(ids[index - 1], p1, p2)
+                .then(model => {
+                  if (index > 1) {
+                    stream.push(",\n");
+                  }
+                  stream.push(JSON.stringify(model) + "\n");
+                  next();
+                }).catch(error => {
+                stream.emit("error", error);
+                stream.push(null);
+              });
+            }
+          };
+          next();
+        }).catch(e => {
+          stream.emit("error", e);
+          stream.push(null);
+        });
+      }
+    };
+    return stream;
   }
 
   /**
    * Save document
    * @param {T} item
+   * @param p1 first parent
+   * @param p2 second parent
    * @returns {Promise<T>}
    */
-  public save(item: T): Promise<T> {
+  public save(item: T, p1?: P1, p2?: P2): Promise<T> {
+    let filePath = this.getFilePath(p1, p2, item.id);
     return new Promise((resolve, reject) => {
       try {
-        let filePath = pathUtil.join(this.storageFolder, item.name + this.getExt());
-        winston.silly("[repo: " + this.subPath + "] store document: " + item.name);
+        winston.silly("[repo: " + this.subPath + "] store document: " + item.id);
 
         let jsonDocument = this.serialize(item);
         this.makeParentDir(filePath).then(() => {
@@ -175,12 +204,14 @@ export abstract class BaseJsonRepository<T extends BaseModel> implements BaseRep
   /**
    * Delete document
    * @param {string} id
+   * @param p1 first parent
+   * @param p2 second parent
    * @returns {Promise<boolean>}
    */
-  public delete(id: string): Promise<boolean> {
+  public delete(id: string, p1?: P1, p2?: P2): Promise<boolean> {
+    let filePath = this.getFilePath(p1, p2, id);
     return new Promise((resolve, reject) => {
       try {
-        let filePath = pathUtil.join(this.storageFolder, id + this.getExt());
         winston.silly("[repo: " + this.subPath + "] delete document: " + id);
 
         fs.exists(filePath, exists => {
@@ -259,6 +290,33 @@ export abstract class BaseJsonRepository<T extends BaseModel> implements BaseRep
         resolve();
       }
     });
+  }
+
+  /**
+   * Get filePath of the entry
+   * @param {string} id id of the entry
+   * @param {P1} p1 first parent
+   * @param {P2} p2 second parent
+   * @returns {string}
+   */
+  private getFilePath(p1?: P1, p2?: P2, id?: string): string {
+    let path = this.storageFolder;
+    if (this.p1Type) {
+      if (!p1) {
+        throw new Error("First parent is undefined");
+      }
+      path = pathUtil.join(path, p1.id.toLowerCase());
+    }
+    if (this.p2Type) {
+      if (!p2) {
+        throw new Error("Second parent is undefined");
+      }
+      path = pathUtil.join(path, p2.id.toLowerCase());
+    }
+    if (id !== undefined) {
+      path = pathUtil.join(path, id.toLowerCase() + this.getExt());
+    }
+    return path;
   }
 
 }

@@ -1,0 +1,47 @@
+
+.sidebar-header {
+  position: relative;
+  display: inline-block;
+  height: 100px;
+  width: 100%;
+}
+
+.title {
+  position: absolute;
+  width: 100%;
+  height: 28px;
+  margin-top: 32px;
+  color: white;
+  font-size: 24px;
+  text-align: center;
+}
+
+.bg-image {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  background-image: url('/assets/images/microdocs-white.png');
+  background-size: contain;
+}
+
+.bg-image.left {
+  left: 7px;
+  bottom: -13px;
+}
+
+.bg-image.right {
+  right: 7px;
+  top: -11px;
+}
+
+.selectfield {
+  position: absolute !important;
+  right: 0;
+  bottom: 0;
+  width: 220px !important;
+  text-align: right;
+}
+
+.selectfield hr {
+  display: none !important;
+}

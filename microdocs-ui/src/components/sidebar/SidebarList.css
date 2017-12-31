@@ -1,0 +1,22 @@
+
+.sidebar-list{
+  position: absolute;
+  top: 100px;
+  bottom: 0;
+  width: 100%;
+}
+
+.repo-list {
+  flex: 2;
+}
+
+.project-list {
+  flex: 1;
+}
+
+.bottom-list {
+  position: absolute;
+  bottom: 0;
+  height: 64px;
+  width: 100%;
+}

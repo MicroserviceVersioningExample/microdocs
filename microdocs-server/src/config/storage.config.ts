@@ -3,6 +3,7 @@ import { Container } from "typedi";
 import { ProjectJsonRepository } from "../repositories/json/project-json.repo";
 import { storage, web } from "./property-keys";
 import { Settings } from "./settings";
+import { RepoJsonRepository } from "../repositories/json/repo-json.repo";
 
 /**
  * Configure the Storage Drivers
@@ -26,6 +27,7 @@ export class StorageConfig {
 
   private configureJson(): void {
     Container.set("project.repo", new ProjectJsonRepository());
+    Container.set("repo.repo", new RepoJsonRepository());
   }
 
 }
