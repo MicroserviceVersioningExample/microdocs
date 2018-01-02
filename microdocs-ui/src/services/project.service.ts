@@ -24,13 +24,17 @@ export class ProjectService {
       let projects: Project[] = r[0];
       let location: Location = r[1];
 
+//      let match = this.routerService.match("/api-docs/:project");
+
+
+
       let segments = location.pathname.split("/");
       let selectedProject: Project;
-      if (segments.length >= 3 && segments[1] === "projects") {
+      if (segments.length >= 3 && segments[1] === "api-docs" && segments[2].length > 0) {
         selectedProject = projects.filter(project => project.name.toLowerCase() === segments[2])[0];
         if (!selectedProject) {
           loggerService.error(`Project '${segments[2]}' doesn't exists`);
-          routerService.history.push("/projects");
+          routerService.history.push("/api-docs");
         }
       }
       if (selectedProject) {

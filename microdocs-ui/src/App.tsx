@@ -16,7 +16,8 @@ const muiTheme = getMuiTheme({
   },
 });
 
-routerService.redirect("/", "/projects");
+routerService.redirect("/", "/api-docs");
+routerService.redirect("/api-docs/:project", "/api-docs/:project/overview");
 
 class App extends React.Component {
 
@@ -25,7 +26,7 @@ class App extends React.Component {
       <HashRouter>
         <MuiThemeProvider muiTheme={muiTheme}>
           <Router history={routerService.history}>
-            <Route path="/projects" component={ProjectRoute} />
+            <Route path="/api-docs" component={ProjectRoute} />
           </Router>
         </MuiThemeProvider>
       </HashRouter>

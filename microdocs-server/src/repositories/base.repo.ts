@@ -1,13 +1,14 @@
 import { Stream } from "stream";
 import { BaseModel } from "../domain/common/base.model";
+import { BaseOptions } from "../domain/common";
 
 /**
  * Repository for basic CRUD operations
  *
  * @author S. Hermans <s.hermans@maxxton.com
  */
-export interface BaseRepository<T extends BaseModel, P1 extends BaseModel = BaseModel,
-  P2 extends BaseModel = BaseModel> {
+export interface BaseRepository<T extends BaseModel<BaseOptions>, P1 extends BaseModel<BaseOptions> = BaseModel<BaseOptions>,
+  P2 extends BaseModel<BaseOptions> = BaseModel<BaseOptions>> {
 
   /**
    * Check if an item already exists with the same id

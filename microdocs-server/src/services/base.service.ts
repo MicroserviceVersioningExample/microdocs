@@ -10,8 +10,8 @@ import * as winston from "winston";
  *
  * @author S. Hermans <s.hermans@maxxton.com
  */
-export class BaseService<T extends BaseModel, O extends BaseOptions, P1 extends BaseModel = BaseModel,
-  P2 extends BaseModel = BaseModel> {
+export class BaseService<T extends BaseModel<O>, O extends BaseOptions, P1 extends BaseModel<BaseOptions> = BaseModel<BaseOptions>,
+  P2 extends BaseModel<BaseOptions> = BaseModel<BaseOptions>> {
 
   /**
    * Create Base Service
@@ -51,7 +51,7 @@ export class BaseService<T extends BaseModel, O extends BaseOptions, P1 extends 
     // Validate model
     let errors = await model.validate();
     if (errors.length > 0) {
-      throw new ValidationException("Project is invalid", errors);
+      throw new ValidationException("Model is invalid", errors);
     }
 
     // Check if id is unique
@@ -90,7 +90,7 @@ export class BaseService<T extends BaseModel, O extends BaseOptions, P1 extends 
     model.edit(options);
     let errors = await model.validate();
     if (errors.length > 0) {
-      throw new ValidationException("Project is invalid", errors);
+      throw new ValidationException("Model is invalid", errors);
     }
 
     // Check if id is unique

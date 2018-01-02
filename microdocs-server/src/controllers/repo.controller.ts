@@ -3,7 +3,7 @@ import {
   Put
 } from "routing-controllers";
 import { Stream } from "stream";
-import { Project, Repo } from "../domain";
+import { Repo } from "../domain";
 import { RepoOptions } from "../domain/repos/repo.model";
 import { ProjectService } from "../services/project.service";
 import { RepoService } from "../services/repo.service";
@@ -29,7 +29,7 @@ export class RepoController {
   }
 
   /**
-   * Get repo by repoId
+   * Get repo by id
    * @param projectId
    * @param {string} repoId
    * @returns {Promise<Repo>}

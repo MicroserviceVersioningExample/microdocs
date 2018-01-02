@@ -1,4 +1,4 @@
-import { MaxLength } from "class-validator";
+import { IsString, MaxLength } from "class-validator";
 import { BaseModel, BaseOptions } from "../common/base.model";
 
 /**
@@ -6,18 +6,7 @@ import { BaseModel, BaseOptions } from "../common/base.model";
  *
  * @author S. Hermans <s.hermans@maxxton.com
  */
-export class Project extends BaseModel {
-
-  @MaxLength(40)
-  private name: string;
-
-  /**
-   * Create new project
-   * @param {ProjectOptions} options
-   */
-  constructor(options: ProjectOptions) {
-    super(options);
-  }
+export class Project extends BaseModel<ProjectOptions> {
 
   /**
    * Update properties of this project
@@ -26,14 +15,12 @@ export class Project extends BaseModel {
   public edit(options: ProjectOptions) {
     super.edit(options);
     if (options) {
-      this.name = options.name || options.id;
+      // Map custom options
     }
   }
 
 }
 
 export interface ProjectOptions extends BaseOptions{
-
-  name?: string;
 
 }

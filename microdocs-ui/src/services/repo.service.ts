@@ -28,9 +28,11 @@ export class RepoService {
   }
 
   public refreshRepos(): void {
-    this.repoClient.getRepos(this.selectedProject)
-      .then(repos => this.reposStream.next(repos))
-      .catch(e => this.loggerService.error("Failed to load repositories", e));
+    if(this.selectedProject) {
+      this.repoClient.getRepos( this.selectedProject )
+          .then( repos => this.reposStream.next( repos ) )
+          .catch( e => this.loggerService.error( "Failed to load repositories", e ) );
+    }
   }
 
 }

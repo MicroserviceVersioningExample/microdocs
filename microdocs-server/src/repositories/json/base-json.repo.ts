@@ -5,16 +5,17 @@ import { Readable, Stream } from "stream";
 import * as winston from "winston";
 import { storage } from "../../config/property-keys";
 import { Settings } from "../../config/settings";
-import { BaseModel } from "../../domain/common/base.model";
+import { BaseModel } from "../../domain/common";
 import { BaseRepository } from "../base.repo";
+import { BaseOptions } from "../../domain/common";
 
 /**
  * Basic CRUD Json file based repository
  *
- * @author S. Hermans <s.hermans@maxxton.com
+ * @author S. Hermans <s.hermans@maxxton.com>
  */
-export abstract class BaseJsonRepository<T extends BaseModel, P1 extends BaseModel = BaseModel,
-  P2 extends BaseModel = BaseModel> implements BaseRepository<T, P1, P2> {
+export abstract class BaseJsonRepository<T extends BaseModel<BaseOptions>, P1 extends BaseModel<BaseOptions> = BaseModel<BaseOptions>,
+  P2 extends BaseModel<BaseOptions> = BaseModel<BaseOptions>> implements BaseRepository<T, P1, P2> {
 
   private subPath: string;
   private storageFolder: string;
@@ -70,7 +71,7 @@ export abstract class BaseJsonRepository<T extends BaseModel, P1 extends BaseMod
               if (err) {
                 reject(err);
               } else {
-                let script = JSON.parse(data.toString());
+                let script = this.deserialize(data.toString());
                 resolve(script);
               }
             });

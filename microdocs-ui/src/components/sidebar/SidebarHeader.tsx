@@ -44,7 +44,7 @@ export default class SidebarHeader extends React.Component<any, any> {
 
   public handleChange = (event: any, index: number, value: string) => {
     this.setState({ project: value, projects: this.state.projects });
-    routerService.history.push(`/projects/${value}`);
+    routerService.history.push(`/api-docs/${value}`);
   }
 
   public render() {

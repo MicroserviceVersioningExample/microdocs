@@ -1,22 +1,31 @@
-import { IsNotEmpty, Matches, MaxLength, validate as validateClass, ValidationError } from "class-validator";
+import {
+  IsNotEmpty, IsOptional, IsString, Matches, MaxLength, validate as validateClass,
+  ValidationError
+} from "class-validator";
 
 /**
  * Base model
  *
- * @author S. Hermans <s.hermans@maxxton.com
+ * @author S. Hermans <s.hermans@maxxton.com>
  */
-export class BaseModel {
+export class BaseModel<O extends BaseOptions> {
 
   @IsNotEmpty()
+  @IsString()
   @MaxLength(30)
   @Matches(/^[a-z][a-z0-9-]*$/)
   public id: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(40)
+  public name: string;
 
   /**
    * Create new model
    * @param {BaseOptions} options
    */
-  constructor(options: BaseOptions) {
+  constructor(options: O) {
     this.edit(options);
   }
 
@@ -24,9 +33,10 @@ export class BaseModel {
    * Update properties of this model
    * @param {BaseOptions} options
    */
-  public edit(options: BaseOptions) {
+  public edit(options: O) {
     if (options) {
       this.id = options.id ? options.id.toLowerCase() : undefined;
+      this.name = options.name || options.id;
     }
   }
 
@@ -38,25 +48,11 @@ export class BaseModel {
     return validateClass(this);
   }
 
-  public toJSON(): string {
-    let obj: any = {};
-
-    for (let key in this) {
-      if (key[0] !== "_") {
-        obj[key] = this[key];
-      } else {
-        let keyName = key.substr(1);
-        obj[keyName] = this[key];
-      }
-    }
-
-    return obj;
-  }
-
 }
 
 export interface BaseOptions {
 
   id: string;
+  name?: string;
 
 }
