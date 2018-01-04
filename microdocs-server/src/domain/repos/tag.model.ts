@@ -14,7 +14,7 @@ export class Tag extends BaseModel<TagOptions> {
 
   @MaxLength(30)
   @IsString()
-  public documentId: string;
+  public ref: string;
 
   /**
    * Update properties of this project
@@ -24,7 +24,7 @@ export class Tag extends BaseModel<TagOptions> {
     super.edit(options);
     if (options) {
       this.taggedOn = options.taggedOn;
-      this.documentId = options.documentId;
+      this.ref = options.ref;
     }
   }
 
@@ -33,6 +33,6 @@ export class Tag extends BaseModel<TagOptions> {
 export interface TagOptions extends BaseOptions {
 
   taggedOn: string;
-  documentId: string;
+  ref: string;
 
 }

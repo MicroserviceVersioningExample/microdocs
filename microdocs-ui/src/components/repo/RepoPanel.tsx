@@ -1,8 +1,8 @@
-import * as React from "react";
 import { AppBar } from "material-ui";
 import { orange500 } from "material-ui/styles/colors";
-import "./RepoPanel.css";
+import * as React from "react";
 import RepoControls from "./RepoControls";
+import "./RepoPanel.css";
 
 export default class RepoPanel extends React.Component<any, any> {
 
@@ -13,7 +13,7 @@ export default class RepoPanel extends React.Component<any, any> {
             title={this.props.match.params.repo.toLowerCase()}
             showMenuIconButton={false}
             style={{backgroundColor: orange500}}
-            iconElementRight={<RepoControls/>}
+            iconElementRight={<RepoControls />}
         />
       </div>
     );
