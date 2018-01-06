@@ -2,12 +2,9 @@ import {
   Body, Delete, Get, JsonController, NotFoundError, OnNull, OnUndefined, Param, Post,
   Put
 } from "routing-controllers";
-import { Stream } from "stream";
-import { Repo } from "../domain";
-import { RepoOptions } from "../domain/repos/repo.model";
+import { Tag, TagOptions } from "../domain/repos/tag.model";
 import { ProjectService } from "../services/project.service";
 import { RepoService } from "../services/repo.service";
-import { Tag, TagOptions } from "../domain/repos/tag.model";
 
 @JsonController("/api/v2")
 export class TagController {
@@ -43,7 +40,8 @@ export class TagController {
    */
   @Get("/projects/:project/repos/:repo/tags/:tag")
   @OnNull(404)
-  public async getTag(@Param("project") projectId: string, @Param("repo") repoId: string, @Param("tag") tagId: string): Promise<Tag> {
+  public async getTag(@Param("project") projectId: string, @Param("repo") repoId: string,
+                      @Param("tag") tagId: string): Promise<Tag> {
     let project = await this.projectService.getById(projectId);
     if (!project) {
       throw new NotFoundError(`Project '${projectId}' doesn't exists`);
@@ -63,7 +61,8 @@ export class TagController {
    * @returns {Promise<Tag>}
    */
   @Post("/projects/:project/repos/:repo/tags")
-  public async createTag(@Param("project") projectId: string, @Param("repo") repoId: string, @Body() tag: TagOptions): Promise<Tag> {
+  public async createTag(@Param("project") projectId: string,
+                         @Param("repo") repoId: string, @Body() tag: TagOptions): Promise<Tag> {
     let project = await this.projectService.getById(projectId);
     if (!project) {
       throw new NotFoundError(`Project '${projectId}' doesn't exists`);
@@ -85,7 +84,7 @@ export class TagController {
    */
   @Put("/projects/:project/repos/:repo/tags/:tag")
   public async editTag(@Param("project") projectId: string, @Param("repo") repoId: string, @Param("tag") tagId: string,
-                           @Body() tag: TagOptions): Promise<Tag> {
+                       @Body() tag: TagOptions): Promise<Tag> {
     let project = await this.projectService.getById(projectId);
     if (!project) {
       throw new NotFoundError(`Project '${projectId}' doesn't exists`);
@@ -106,7 +105,8 @@ export class TagController {
    */
   @Delete("/projects/:project/repos/:repo/tags/:tag")
   @OnUndefined(204)
-  public async deleteRepo(@Param("project") projectId: string, @Param("repo") repoId: string, @Param("tag") tagId: string): Promise<void> {
+  public async deleteRepo(@Param("project") projectId: string, @Param("repo") repoId: string, @Param(
+    "tag") tagId: string): Promise<void> {
     let project = await this.projectService.getById(projectId);
     if (!project) {
       throw new NotFoundError(`Project '${projectId}' doesn't exists`);

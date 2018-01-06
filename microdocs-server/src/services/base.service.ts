@@ -1,16 +1,17 @@
 import { ValidationError } from "class-validator";
+import { Observable } from "rxjs/Observable";
 import { Stream } from "stream";
 import { BaseModel, BaseOptions } from "../domain/common/base.model";
 import { ValidationException } from "../domain/common/validation.error";
 import { BaseRepository } from "../repositories/base.repo";
-import * as winston from "winston";
 
 /**
  * Basic CRUD Service
  *
  * @author S. Hermans <s.hermans@maxxton.com
  */
-export class BaseService<T extends BaseModel<O>, O extends BaseOptions, P1 extends BaseModel<BaseOptions> = BaseModel<BaseOptions>,
+export class BaseService<T extends BaseModel<O>, O extends BaseOptions,
+  P1 extends BaseModel<BaseOptions> = BaseModel<BaseOptions>,
   P2 extends BaseModel<BaseOptions> = BaseModel<BaseOptions>> {
 
   /**
@@ -160,7 +161,7 @@ export class BaseService<T extends BaseModel<O>, O extends BaseOptions, P1 exten
    * @param p2 second parent
    * @returns {Stream}
    */
-  public getAllAsStream(p1?: P1, p2?: P2): Stream {
+  public getAllAsStream(p1?: P1, p2?: P2): Observable<T> {
     return this.baseRepository.findAllAsStream(p1, p2);
   }
 

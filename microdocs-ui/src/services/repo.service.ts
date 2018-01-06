@@ -21,8 +21,10 @@ export class RepoService {
               private routerService: RouterService,
               private projectService: ProjectService) {
     projectService.selectedProject.subscribe(selectedProject => {
-      this.selectedProject = selectedProject;
-      this.refreshRepos();
+      if(this.selectedProject !== selectedProject) {
+        this.selectedProject = selectedProject;
+        this.refreshRepos();
+      }
     });
 
     Observable.combineLatest(this.repos, routerService.location).subscribe(r => {

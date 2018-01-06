@@ -1,6 +1,7 @@
 import { Stream } from "stream";
 import { BaseModel } from "../domain/common/base.model";
 import { BaseOptions } from "../domain/common";
+import { Observable } from "rxjs/Observable";
 
 /**
  * Repository for basic CRUD operations
@@ -50,7 +51,7 @@ export interface BaseRepository<T extends BaseModel<BaseOptions>, P1 extends Bas
    * @param p2 second parent
    * @returns {Stream}
    */
-  findAllAsStream(p1?: P1, p2?: P2): Stream;
+  findAllAsStream(p1?: P1, p2?: P2): Observable<T>;
 
   /**
    * Create or update item

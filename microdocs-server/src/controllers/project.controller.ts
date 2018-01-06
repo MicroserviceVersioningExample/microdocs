@@ -5,6 +5,7 @@ import {
 import { Stream } from "stream";
 import { Project, ProjectOptions } from "../domain";
 import { ProjectService } from "../services/project.service";
+import { observableToJsonStream } from "../helpers/stream.helper";
 
 @JsonController("/api/v2")
 export class ProjectController {
@@ -18,7 +19,7 @@ export class ProjectController {
    */
   @Get("/projects")
   public getProjects(): Stream {
-    return this.projectService.getAllAsStream();
+    return observableToJsonStream(this.projectService.getAllAsStream());
   }
 
   /**

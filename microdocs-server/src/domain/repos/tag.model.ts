@@ -12,7 +12,7 @@ export class Tag extends BaseModel<TagOptions> {
   @IsDateString()
   public taggedOn: string;
 
-  @MaxLength(30)
+  @MaxLength(38)
   @IsString()
   public ref: string;
 

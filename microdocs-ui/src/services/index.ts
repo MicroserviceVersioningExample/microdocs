@@ -1,4 +1,4 @@
-import { projectClient, repoClient } from "../clients/fetch/index";
+import { documentClient, projectClient, repoClient } from "../clients/fetch/index";
 import { LoggerService } from "./logger.service";
 import { ProjectService } from "./project.service";
 import { RepoService } from "./repo.service";
@@ -13,4 +13,4 @@ export const routerService = new RouterService();
 export const loggerService = new LoggerService();
 export const projectService = new ProjectService(projectClient, loggerService, routerService);
 export const repoService = new RepoService(repoClient, loggerService, routerService, projectService);
-export const documentService = new DocumentService(loggerService, routerService, projectService, repoService);
+export const documentService = new DocumentService(documentClient, loggerService, routerService, projectService, repoService);

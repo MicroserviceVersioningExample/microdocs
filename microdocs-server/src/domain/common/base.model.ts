@@ -12,8 +12,8 @@ export class BaseModel<O extends BaseOptions> {
 
   @IsNotEmpty()
   @IsString()
-  @MaxLength(30)
-  @Matches(/^[a-z][a-z0-9-]*$/)
+  @MaxLength(38)
+  @Matches(/^[a-z0-9-]*$/)
   public id: string;
 
   @IsOptional()

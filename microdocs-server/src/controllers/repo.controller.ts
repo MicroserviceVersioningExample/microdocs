@@ -7,6 +7,7 @@ import { Repo } from "../domain";
 import { RepoOptions } from "../domain/repos/repo.model";
 import { ProjectService } from "../services/project.service";
 import { RepoService } from "../services/repo.service";
+import { observableToJsonStream } from "../helpers/stream.helper";
 
 @JsonController("/api/v2")
 export class RepoController {
@@ -25,7 +26,7 @@ export class RepoController {
     if (!project) {
       throw new NotFoundError(`Project '${projectId}' doesn't exists`);
     }
-    return this.repoService.getAllAsStream(project);
+    return observableToJsonStream(this.repoService.getAllAsStream(project));
   }
 
   /**

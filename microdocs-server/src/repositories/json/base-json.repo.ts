@@ -8,6 +8,7 @@ import { Settings } from "../../config/settings";
 import { BaseModel } from "../../domain/common";
 import { BaseRepository } from "../base.repo";
 import { BaseOptions } from "../../domain/common";
+import { Observable } from "rxjs/Observable";
 
 /**
  * Basic CRUD Json file based repository
@@ -135,42 +136,25 @@ export abstract class BaseJsonRepository<T extends BaseModel<BaseOptions>, P1 ex
    * @param p2 second parent
    * @returns {Stream}
    */
-  public findAllAsStream(p1?: P1, p2?: P2): Stream {
-    let stream = new Readable();
-    let reading = false;
-    stream._read = () => {
-      if (!reading) {
-        reading = true;
-        this.findAllIds(p1, p2).then(ids => {
-          stream.push("[\n");
-          let index = 0;
-          let next = () => {
-            index++;
-            if (index > ids.length) {
-              stream.push("]");
-              stream.push(null);
-            } else {
-              this.find(ids[index - 1], p1, p2)
-                .then(model => {
-                  if (index > 1) {
-                    stream.push(",\n");
-                  }
-                  stream.push(JSON.stringify(model) + "\n");
-                  next();
-                }).catch(error => {
-                stream.emit("error", error);
-                stream.push(null);
-              });
-            }
-          };
-          next();
-        }).catch(e => {
-          stream.emit("error", e);
-          stream.push(null);
-        });
-      }
-    };
-    return stream;
+  public findAllAsStream(p1?: P1, p2?: P2): Observable<T> {
+    return Observable.create(observer => {
+      this.findAllIds(p1, p2).then(ids => {
+
+        let index = -1;
+        let next = () => {
+          index++;
+          if (index >= ids.length) {
+            observer.complete();
+          } else {
+            this.find(ids[index], p1, p2).then(model => {
+              observer.next(model);
+              next();
+            }).catch(error => observer.error);
+          }
+        };
+        next();
+      }).catch(error => observer.error);
+    });
   }
 
   /**

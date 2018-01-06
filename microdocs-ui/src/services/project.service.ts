@@ -44,7 +44,9 @@ export class ProjectService {
 
   public refreshProjects() {
     this.projectClient.getProjects()
-      .then(projects => this.projectStream.next(projects))
+      .then(projects => {
+        this.projectStream.next(projects)
+      })
       .catch(e => this.loggerService.error("Failed to load projects", e));
   }
 
