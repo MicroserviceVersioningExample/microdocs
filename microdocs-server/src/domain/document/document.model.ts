@@ -36,12 +36,9 @@ export class Document extends BaseModel<DocumentOptions> implements MicroDocsDoc
       if (options.info && options.info.title) {
         this.name = options.info.title;
       }
-      this.servers = options.servers;
-      this.externalDocs = options.externalDocs;
-      this.tags = options.tags;
-      this.security = options.security;
-      this.components = options.components;
-      this.paths = options.paths;
+      Object.keys(options).forEach(key => {
+        this[key] = options[key];
+      });
     }
   }
 

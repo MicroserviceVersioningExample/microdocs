@@ -13,57 +13,73 @@ import { RouterService } from "./router.service";
 
 export class DocumentService {
 
-  private documentStream = new ReplaySubject<Document>();
+  private documentStream    = new ReplaySubject<Document>();
   private selectedRefStream = new ReplaySubject<Tag>();
   private selectedDocumentId: string;
 
-  constructor(private documentClient: DocumentClient,
-              private loggerService: LoggerService,
-              private routerService: RouterService,
-              private projectService: ProjectService,
-              private repoService: RepoService) {
-    Observable.combineLatest(projectService.selectedProject, repoService.selectedRepo, routerService.location)
-      .subscribe(r => {
-        let project: Project = r[0];
-        let repo: Repo = r[1];
-        let location: Location = r[2];
+  constructor( private documentClient: DocumentClient,
+               private loggerService: LoggerService,
+               private routerService: RouterService,
+               private projectService: ProjectService,
+               private repoService: RepoService ) {
+    Observable.combineLatest( projectService.selectedProject, repoService.selectedRepo, routerService.location )
+        .subscribe( r => {
+          let project: Project   = r[ 0 ];
+          let repo: Repo         = r[ 1 ];
+          let location: Location = r[ 2 ];
 
-        if (project && repo) {
+          if ( project && repo ) {
 
-          // Find reference
-          let query = routerService.parseSearch(location);
-          let ref = query["ref"] || repo.latestTag;
-          let tag = repo.tags.filter(tag => tag.id === ref)[0];
-          if (!tag) {
-            tag = { id: ref, name: ref, ref };
+            // Find reference
+            let query = routerService.parseSearch( location );
+            let ref   = query[ "ref" ] || repo.latestTag;
+            let tag   = repo.tags.filter( tag => tag.id === ref )[ 0 ];
+            if ( !tag ) {
+              if ( ref ) {
+                tag = { id: ref, name: ref, ref };
+              } else {
+                tag = null;
+              }
+            }
+            this.selectedRefStream.next( tag );
+
+            // Load document
+            this.loadDocument( project, repo, tag );
+          } else {
+            this.selectedRefStream.next( null );
           }
-          this.selectedRefStream.next(tag);
-
-          // Load document
-          this.loadDocument(project, repo, tag);
-        } else {
-          this.selectedRefStream.next(null);
-        }
-      });
+        } );
   }
 
   public get selectedRef(): Observable<Tag> {
     return this.selectedRefStream;
   }
 
-  private loadDocument(project: Project, repo: Repo, tag: Tag) {
-    if (this.selectedDocumentId !== tag.ref) {
-      this.documentClient.getDocument(project, repo, tag.ref).then(document => {
-        if (document) {
+  public get document(): Observable<Document> {
+    return this.documentStream;
+  }
+
+  private loadDocument( project: Project, repo: Repo, tag: Tag ) {
+    if ( !tag ) {
+      this.loggerService.error( `No documents found for ${repo.name}` );
+      this.documentStream.next( null );
+      this.selectedDocumentId = null;
+    } else if ( !tag.ref ) {
+      this.loggerService.error( `Document '${tag.name}' doesn't exists` );
+      this.documentStream.next( null );
+      this.selectedDocumentId = null;
+    } else if ( this.selectedDocumentId !== tag.ref ) {
+      this.documentClient.getDocument( project, repo, tag.ref ).then( document => {
+        if ( document ) {
           this.selectedDocumentId = document.id;
-          this.documentStream.next(document);
+          this.documentStream.next( document );
         } else {
-          this.loggerService.error(`Document '${tag.name}' doesn't exists`);
-          this.documentStream.next(null);
+          this.loggerService.error( `Document '${tag.name}' doesn't exists` );
+          this.documentStream.next( null );
         }
-      }).catch(e => {
-        this.loggerService.error(`Failed to load document ${tag.name}`, e);
-      });
+      } ).catch( e => {
+        this.loggerService.error( `Failed to load document ${tag.name}`, e );
+      } );
     }
   }
 

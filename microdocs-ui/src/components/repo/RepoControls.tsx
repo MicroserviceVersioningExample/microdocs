@@ -6,8 +6,12 @@ import { Observable } from "rxjs/Observable";
 import { documentService, repoService, routerService } from "../../services/index";
 import "./RepoControls.css";
 import { Tag } from "../../domain/tag.model";
+import { Subscription } from "rxjs/Subscription";
 
 export default class RepoControls extends React.Component<any, {value: string, items: any[]}> {
+
+  private subscription: Subscription;
+  private mounted: boolean = false;
 
   constructor(params: any){
     super(params);
@@ -16,7 +20,8 @@ export default class RepoControls extends React.Component<any, {value: string, i
       items: []
     };
 
-    Observable.combineLatest(repoService.selectedRepo, documentService.selectedRef).subscribe(r => {
+    console.info("subscribe")
+    this.subscription = Observable.combineLatest(repoService.selectedRepo, documentService.selectedRef).subscribe(r => {
       let repo = r[0];
       let ref = r[1];
       if (repo && ref) {
@@ -36,6 +41,25 @@ export default class RepoControls extends React.Component<any, {value: string, i
       }
     });
 
+  }
+
+  public setState(state: any){
+    if(this.mounted){
+      super.setState(state);
+    }else{
+      this.state = state;
+    }
+  }
+
+  public componentDidMount(){
+    this.mounted = true;
+  }
+
+  public componentWillUnmount() {
+    this.mounted = false;
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   public handleChange = (event: any, index: number, value: string) => {
