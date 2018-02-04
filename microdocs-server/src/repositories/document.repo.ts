@@ -1,5 +1,5 @@
 
-import { Document } from "../domain/document/document.model";
+import { Document } from "../domain/documents/document.model";
 import { Project } from "../domain/projects/project.model";
 import { Repo } from "../domain/repos/repo.model";
 import { BaseRepository } from "./base.repo";

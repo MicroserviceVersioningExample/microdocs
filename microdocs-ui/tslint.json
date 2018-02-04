@@ -16,7 +16,9 @@
     "prefer-const": false,
     "no-implicit-dependencies": [true, "dev"],
     "no-trailing-whitespace": false,
-
-    "jsx-curly-spacing": false
+    "no-var-requires" : false,
+    "jsx-curly-spacing": false,
+    "prefer-conditional-expression": false,
+    "jsx-no-multiline-js": false
   }
 }

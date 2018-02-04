@@ -21,3 +21,18 @@ export const storage = {
     folder: "storage.json.folder"
   }
 };
+
+export const auth = {
+  server: {
+    enabled: "auth.server.enabled",
+
+    client: {
+      id: "auth.server.client.id",
+      secret: "auth.server.client.secret",
+      redirect_uris: "auth.server.client.redirect_uris",
+      grants: "auth.server.client.grants",
+      access_token_lifetime: "auth.server.client.access_token_lifetime",
+      refresh_token_lifetime: "auth.server.client.refresh_token_lifetime"
+    }
+  }
+};

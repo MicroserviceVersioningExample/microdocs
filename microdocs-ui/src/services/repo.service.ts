@@ -1,18 +1,17 @@
 import { Location } from "history";
+import { BehaviorSubject } from "rxjs/BehaviorSubject";
 import { Observable } from "rxjs/Observable";
-import { ReplaySubject } from "rxjs/ReplaySubject";
 import { RepoClient } from "../clients/repo.client";
 import { Project } from "../domain/project.model";
 import { Repo } from "../domain/repo.model";
-import { Tag } from "../domain/tag.model";
 import { LoggerService } from "./logger.service";
 import { ProjectService } from "./project.service";
 import { RouterService } from "./router.service";
 
 export class RepoService {
 
-  private reposStream = new ReplaySubject<Repo[]>();
-  private selectedRepoStream = new ReplaySubject<Repo>();
+  private reposStream = new BehaviorSubject<Repo[]>([]);
+  private selectedRepoStream = new BehaviorSubject<Repo>(null);
   private loadedProject: Project;
   private selectedProject: Project;
 
@@ -21,7 +20,7 @@ export class RepoService {
               private routerService: RouterService,
               private projectService: ProjectService) {
     projectService.selectedProject.subscribe(selectedProject => {
-      if(this.selectedProject !== selectedProject) {
+      if (this.selectedProject !== selectedProject) {
         this.selectedProject = selectedProject;
         this.refreshRepos();
       }
@@ -38,13 +37,19 @@ export class RepoService {
           if (!selectedRepo) {
             loggerService.error(`Repo '${params["repo"]}' doesn't exists`);
             routerService.history.push(`/api-docs/${params["project"]}/overview`);
-            this.selectedRepoStream.next(null);
+            if (this.selectedRepoStream.value !== null) {
+              this.selectedRepoStream.next(null);
+            }
           } else {
-            this.selectedRepoStream.next(selectedRepo);
+            if (this.selectedRepoStream.value !== selectedRepo) {
+              this.selectedRepoStream.next(selectedRepo);
+            }
 
           }
         } else {
-          this.selectedRepoStream.next(null);
+          if (this.selectedRepoStream.value !== null) {
+            this.selectedRepoStream.next(null);
+          }
         }
       }
     }, e => this.loggerService.error(e));

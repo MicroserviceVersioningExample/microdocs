@@ -1,7 +1,7 @@
 import { Location } from "history";
 import "rxjs/add/observable/combineLatest";
+import { BehaviorSubject } from "rxjs/BehaviorSubject";
 import { Observable } from "rxjs/Observable";
-import { ReplaySubject } from "rxjs/ReplaySubject";
 import { ProjectClient } from "../clients/project.client";
 import { Project } from "../domain/project.model";
 import { LoggerService } from "./logger.service";
@@ -12,8 +12,8 @@ import { RouterService } from "./router.service";
  */
 export class ProjectService {
 
-  private projectStream = new ReplaySubject<Project[]>();
-  private selectedProjectStream = new ReplaySubject<Project>();
+  private projectStream = new BehaviorSubject<Project[]>([]);
+  private selectedProjectStream = new BehaviorSubject<Project>(null);
 
   constructor(private projectClient: ProjectClient,
               private loggerService: LoggerService,
@@ -25,15 +25,20 @@ export class ProjectService {
       let location: Location = r[1];
 
       let params = this.routerService.parsePath(location, "/api-docs/:project/*");
-      if (params && params["project"]) {
+      if (params && params["project"] && projects && projects.length > 0) {
         let selectedProject = projects.filter(project => project.name.toLowerCase() === params["project"])[0];
         if (!selectedProject) {
           loggerService.error(`Project '${params["project"]}' doesn't exists`);
           routerService.history.push("/api-docs");
         }
-        this.selectedProjectStream.next(selectedProject || null);
+        let newValue = selectedProject || null;
+        if (this.selectedProjectStream.value !== newValue) {
+          this.selectedProjectStream.next(newValue);
+        }
       } else {
-        this.selectedProjectStream.next(null);
+        if (this.selectedProjectStream.value !== null) {
+          this.selectedProjectStream.next(null);
+        }
       }
     }, e => this.loggerService.error(e));
   }
@@ -45,7 +50,7 @@ export class ProjectService {
   public refreshProjects() {
     this.projectClient.getProjects()
       .then(projects => {
-        this.projectStream.next(projects)
+        this.projectStream.next(projects);
       })
       .catch(e => this.loggerService.error("Failed to load projects", e));
   }
@@ -55,7 +60,9 @@ export class ProjectService {
   }
 
   public setSelectedProject(project: Project): void {
-    this.selectedProjectStream.next(project);
+    if (this.selectedProjectStream.value !== project) {
+      this.selectedProjectStream.next(project);
+    }
   }
 
 }

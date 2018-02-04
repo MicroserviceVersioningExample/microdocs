@@ -1,5 +1,5 @@
 import { Inject, Service } from "typedi";
-import { Document, DocumentOptions } from "../domain/document/document.model";
+import { Document, DocumentOptions } from "../domain/documents/document.model";
 import { Repo } from "../domain/index";
 import { Project } from "../domain/projects/project.model";
 import { BaseService } from "./base.service";

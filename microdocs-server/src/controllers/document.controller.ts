@@ -3,7 +3,7 @@ import {
   Put
 } from "routing-controllers";
 import * as uuid from "uuid/v4";
-import { Document, DocumentOptions } from "../domain/document/document.model";
+import { Document, DocumentOptions } from "../domain/documents/document.model";
 import { DocumentService } from "../services/document.service";
 import { ProjectService } from "../services/project.service";
 import { RepoService } from "../services/repo.service";

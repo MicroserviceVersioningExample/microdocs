@@ -1,6 +1,5 @@
+import { AppBar } from "material-ui";
 import * as React from "react";
-import { AppBar, IconButton } from "material-ui";
-import { ActionHome } from "material-ui/svg-icons";
 
 export default class OverviewPanel extends React.Component {
 

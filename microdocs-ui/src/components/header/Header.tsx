@@ -1,17 +1,23 @@
-import { AppBar } from "material-ui";
+import { blue500, orange500 } from "material-ui/styles/colors";
 import * as React from "react";
+import "./Header.css";
 
-class Header extends React.Component<any, {open: boolean}> {
+class Header extends React.Component {
 
   constructor(props: any) {
     super(props);
-    this.state = { open: true };
   }
 
   public render() {
     return (
-      <div>
-        <AppBar title="MicroDocs"/>
+      <div className="header">
+        <a className="logo" href="/" >
+          <img src="assets/images/microdocs.png" alt="MicroDocs logo" className="logo-img" />
+          <div className="logo-text">
+            <span style={{color: blue500}}>Micro</span>
+            <span style={{color: orange500}}>Docs</span>
+          </div>
+        </a>
       </div>
     );
   }

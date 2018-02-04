@@ -1,26 +1,24 @@
-
 import { DropDownMenu, MenuItem } from "material-ui";
 import { white } from "material-ui/styles/colors";
 import * as React from "react";
 import { Observable } from "rxjs/Observable";
+import { Subscription } from "rxjs/Subscription";
+import { Tag } from "../../domain/tag.model";
 import { documentService, repoService, routerService } from "../../services/index";
 import "./RepoControls.css";
-import { Tag } from "../../domain/tag.model";
-import { Subscription } from "rxjs/Subscription";
 
-export default class RepoControls extends React.Component<any, {value: string, items: any[]}> {
+export default class RepoControls extends React.Component<any, { value: string, items: any[] }> {
 
   private subscription: Subscription;
   private mounted: boolean = false;
 
-  constructor(params: any){
+  constructor(params: any) {
     super(params);
     this.state = {
       value: "",
       items: []
     };
 
-    console.info("subscribe")
     this.subscription = Observable.combineLatest(repoService.selectedRepo, documentService.selectedRef).subscribe(r => {
       let repo = r[0];
       let ref = r[1];
@@ -43,15 +41,15 @@ export default class RepoControls extends React.Component<any, {value: string, i
 
   }
 
-  public setState(state: any){
-    if(this.mounted){
+  public setState(state: any) {
+    if (this.mounted) {
       super.setState(state);
-    }else{
+    } else {
       this.state = state;
     }
   }
 
-  public componentDidMount(){
+  public componentDidMount() {
     this.mounted = true;
   }
 
@@ -64,24 +62,24 @@ export default class RepoControls extends React.Component<any, {value: string, i
 
   public handleChange = (event: any, index: number, value: string) => {
     this.setState({ value: value || "", items: this.state.items });
-    routerService.navigateSearch({ref: value});
+    routerService.navigateSearch({ ref: value });
   }
 
   public render() {
 
     return (
-        <div className="repo-controls">
-          <DropDownMenu
-              className="tag-field"
-              underlineStyle={{display: "none"}}
-              labelStyle={{color: white}}
-              maxHeight={300}
-              value={this.state.value}
-              onChange={this.handleChange}
-          >
-            {this.state.items}
-          </DropDownMenu>
-        </div>
+      <div className="repo-controls">
+        <DropDownMenu
+          className="tag-field"
+          underlineStyle={{ display: "none" }}
+          labelStyle={{ color: white }}
+          maxHeight={300}
+          value={this.state.value}
+          onChange={this.handleChange}
+        >
+          {this.state.items}
+        </DropDownMenu>
+      </div>
     );
   }
 

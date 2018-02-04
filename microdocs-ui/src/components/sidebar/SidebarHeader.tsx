@@ -9,19 +9,20 @@ export default class SidebarHeader extends React.Component<any, any> {
 
   private projectsListener: Subscription;
   private selectedProjectListener: Subscription;
+  private mounted: boolean;
 
   constructor(props: any) {
     super(props);
     this.state = { project: "", projects: [] };
 
     this.projectsListener = projectService.projects.subscribe(projects => {
-      let items = projects.map(
-        project => <MenuItem value={project.id} key={project.id} primaryText={project.name}/>);
-      this.setState({
-        project: this.state.project,
-        projects: items
+        let items = projects.map(
+          project => <MenuItem value={project.id} key={project.id} primaryText={project.name}/>);
+        this.setState({
+          project: this.state.project,
+          projects: items
+        });
       });
-    });
 
     this.selectedProjectListener = projectService.selectedProject.subscribe(selectedProject => {
       this.setState({
@@ -33,7 +34,20 @@ export default class SidebarHeader extends React.Component<any, any> {
     this.handleChange = this.handleChange.bind(this);
   }
 
+  public setState(state: any) {
+    if (this.mounted) {
+      super.setState(state);
+    } else {
+      this.state = state;
+    }
+  }
+
+  public componentDidMount() {
+    this.mounted = true;
+  }
+
   public componentWillUnmount() {
+    this.mounted = false;
     if (this.projectsListener) {
       this.projectsListener.unsubscribe();
     }

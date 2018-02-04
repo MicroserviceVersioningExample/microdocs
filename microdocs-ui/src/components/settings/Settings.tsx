@@ -1,7 +1,6 @@
-import * as React from "react";
-import { AppBar, IconButton } from "material-ui";
-import { ActionHome } from "material-ui/svg-icons";
+import { AppBar } from "material-ui";
 import { blueGrey500 } from "material-ui/styles/colors";
+import * as React from "react";
 
 export default class SettingsPanel extends React.Component {
 

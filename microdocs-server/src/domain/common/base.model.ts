@@ -19,7 +19,7 @@ export class BaseModel<O extends BaseOptions> {
   @IsOptional()
   @IsString()
   @MaxLength(40)
-  public name: string;
+  public name?: string;
 
   /**
    * Create new model

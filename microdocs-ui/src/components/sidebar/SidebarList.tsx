@@ -1,7 +1,9 @@
 import { Avatar, Divider, List, ListItem, MenuItem, Subheader } from "material-ui";
+import { blue500, orange500 } from "material-ui/styles/colors";
+import Code from "material-ui/svg-icons/action/code";
 import Home from "material-ui/svg-icons/action/home";
 import Settings from "material-ui/svg-icons/action/settings";
-import Code from "material-ui/svg-icons/action/code";
+import Add from "material-ui/svg-icons/content/add";
 import * as React from "react";
 import { NavLink } from "react-router-dom";
 import { Subscription } from "rxjs/Subscription";
@@ -9,13 +11,13 @@ import { Project } from "../../domain/project.model";
 import { Repo } from "../../domain/repo.model";
 import { projectService, repoService } from "../../services/index";
 import "./SidebarList.css";
-import { blue500, orange500 } from "material-ui/styles/colors";
 
 export default class SidebarList extends React.Component<any, { repos: Repo[] }> {
 
   private projectListener: Subscription;
   private reposListener: Subscription;
   private selectedProject: Project = { id: "", name: "" };
+  private mounted: boolean;
 
   constructor(props: any) {
     super(props);
@@ -29,7 +31,20 @@ export default class SidebarList extends React.Component<any, { repos: Repo[] }>
     });
   }
 
+  public setState(state: any) {
+    if (this.mounted) {
+      super.setState(state);
+    } else {
+      this.state = state;
+    }
+  }
+
+  public componentDidMount() {
+    this.mounted = true;
+  }
+
   public componentWillUnmount() {
+    this.mounted = false;
     if (this.reposListener) {
       this.reposListener.unsubscribe();
     }
@@ -43,13 +58,25 @@ export default class SidebarList extends React.Component<any, { repos: Repo[] }>
       <div className="sidebar-list">
         <List>
           <NavLink
-            key={this.selectedProject.id}
+            key={this.selectedProject.id + "-overview"}
             to={`/api-docs/${this.selectedProject.id}/overview`}
             activeClassName="active"
-            className="navlink">
+            className="navlink"
+          >
             <ListItem
               primaryText="Overview"
               leftIcon={<Home/>}
+            />
+          </NavLink>
+          <NavLink
+            to={`/api-docs/${this.selectedProject.id}/create-repo`}
+            key={this.selectedProject.id + "-create"}
+            activeClassName="active"
+            className="navlink"
+          >
+            <ListItem
+              primaryText="Create Repository"
+              leftIcon={<Add/>}
             />
           </NavLink>
         </List>
@@ -61,10 +88,11 @@ export default class SidebarList extends React.Component<any, { repos: Repo[] }>
               to={`/api-docs/${this.selectedProject.id}/repos/${repo.id}`}
               activeClassName="active"
               className="navlink"
-              key={this.selectedProject.id + repo.id}>
+              key={this.selectedProject.id + repo.id}
+            >
               <ListItem
                 primaryText={repo.name}
-                leftAvatar={<Avatar icon={<Code />} backgroundColor={orange500} />}
+                leftAvatar={<Avatar icon={<Code/>} backgroundColor={orange500}/>}
               />
             </NavLink>;
           })}
@@ -74,9 +102,10 @@ export default class SidebarList extends React.Component<any, { repos: Repo[] }>
           <List>
             <NavLink
               to={`/api-docs/${this.selectedProject.id}/settings`}
-              key={this.selectedProject.id}
+              key={this.selectedProject.id + "-settings"}
               activeClassName="active"
-              className="navlink" >
+              className="navlink"
+            >
               <ListItem
                 primaryText="Settings"
                 leftIcon={<Settings/>}

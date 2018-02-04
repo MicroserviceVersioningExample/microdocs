@@ -1,0 +1,47 @@
+
+.stepper-header {
+  width: 100%;
+  max-width: 700px;
+  margin: auto;
+}
+
+.stepper-controls {
+  width: 100%;
+  max-width: 600px;
+  margin: auto;
+  margin-top: 40px;
+}
+
+.content-wrapper {
+  width: 100%;
+  max-width: 600px;
+  margin: auto;
+  padding: 20px;
+}
+
+.checkbox {
+  margin-bottom: 16px;
+}
+
+.document-wrapper {
+  position: absolute;
+  top: 150px;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.document-wrapper .stepper-controls{
+  position: absolute;
+  bottom: 10px;
+  text-align: center;
+  max-width: none;
+}
+
+.document-editor {
+  position: absolute;
+  top: 0px;
+  bottom: 85px;
+  left: 20px;
+  right: 20px;
+}

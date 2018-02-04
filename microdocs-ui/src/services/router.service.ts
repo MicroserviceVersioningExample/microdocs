@@ -37,8 +37,8 @@ export class RouterService {
    */
   public parsePath(location: Location, path: string): { [key: string]: string } {
     let originalSegments = location.pathname.split("/");
-    while (originalSegments[originalSegments.length - 1] === "") {
-      originalSegments = originalSegments.splice(originalSegments.length - 2);
+    while (originalSegments[originalSegments.length - 1] === "" && originalSegments.length > 0) {
+      originalSegments = originalSegments.splice(0, originalSegments.length - 1);
     }
     let pathSegments = path.split("/");
     let params: { [key: string]: string } = {};
@@ -112,7 +112,6 @@ export class RouterService {
     if (this.redirects[location.pathname.toLowerCase()]) {
       this._history.replace(this.redirects[location.pathname.toLowerCase()]);
     } else {
-      let original = location.pathname.split("/");
       Object.keys(this.redirects).some(redirect => {
         let params = this.parsePath(location, redirect);
         if (params) {
