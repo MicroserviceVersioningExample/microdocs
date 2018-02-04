@@ -13,7 +13,7 @@ export class BaseModel<O extends BaseOptions> {
   @IsNotEmpty()
   @IsString()
   @MaxLength(38)
-  @Matches(/^[a-z0-9-]*$/)
+  @Matches(/^[a-z0-9-\.]*$/)
   public id: string;
 
   @IsOptional()

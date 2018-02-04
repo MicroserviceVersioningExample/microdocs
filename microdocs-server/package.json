@@ -13,6 +13,7 @@
     "link": "yarn link @maxxton/microdocs-core",
     "lint": "./node_modules/.bin/tslint -e **/node_modules/** --project tsconfig.json",
     "watch": "rm -rf dist/* && (mkdir dist || true) && cp package.json README.md dist && ./node_modules/.bin/tsc -p tsconfig.json -w",
+    "watchWin": "rm -rf dist/* && (mkdir dist || true) && cp package.json README.md dist && .\\node_modules\\.bin\\tsc -p tsconfig.json -w",
     "clean": "rm -rf dist/*",
     "test": "rm -rf dist/* && (mkdir dist || true) && cp package.json README.md dist && ./node_modules/.bin/tsc -p tsconfig.json && ./node_modules/.bin/nyc --reporter=lcovonly mocha \"./dist/**/*.spec.js\""
   },

@@ -1,11 +1,11 @@
-import { DropDownMenu, MenuItem } from "material-ui";
+import {DropDownMenu, IconButton, MenuItem} from "material-ui";
 import { white } from "material-ui/styles/colors";
 import * as React from "react";
 import { Observable } from "rxjs/Observable";
 import { Subscription } from "rxjs/Subscription";
 import { Tag } from "../../domain/tag.model";
 import { documentService, repoService, routerService } from "../../services/index";
-import "./RepoControls.css";
+import "./RepoTagPanel.css";
 
 export default class RepoControls extends React.Component<any, { value: string, items: any[] }> {
 
@@ -79,6 +79,7 @@ export default class RepoControls extends React.Component<any, { value: string, 
         >
           {this.state.items}
         </DropDownMenu>
+        <IconButton iconClassName="delete" />
       </div>
     );
   }

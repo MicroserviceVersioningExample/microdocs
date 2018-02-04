@@ -8301,6 +8301,10 @@ yaml-js@0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/yaml-js/-/yaml-js-0.2.0.tgz#30cdcc7bf678fdd00695ec34eb17b13aa8961632"
 
+yaml-js@^0.2.3:
+  version "0.2.3"
+  resolved "https://registry.yarnpkg.com/yaml-js/-/yaml-js-0.2.3.tgz#f4cf6c1b3c784f59f55547d7dfcdd06418303291"
+
 yargs-parser@^4.2.0:
   version "4.2.1"
   resolved "https://registry.yarnpkg.com/yargs-parser/-/yargs-parser-4.2.1.tgz#29cceac0dc4f03c6c87b4a9f217dd18c9f74871c"

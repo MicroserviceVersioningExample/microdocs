@@ -1,18 +1,22 @@
 import {
-  AppBar, Checkbox, FlatButton, LinearProgress, RaisedButton, Step, StepLabel, Stepper,
+  AppBar, Checkbox, CircularProgress, FlatButton, LinearProgress, RaisedButton, Step, StepLabel, Stepper,
   TextField
 } from "material-ui";
+import {red500} from "material-ui/styles/colors";
 import * as React from "react";
+import {documentService, projectService, repoService, routerService} from "../../services";
 import EditorPanel from "../document/EditorPanel";
 import "./CreateRepoPanel.css";
+
+const yaml: any = require("yaml-js");
 
 declare const AbortController: any;
 
 export default class CreateRepoPanel
   extends React.Component<any, FormData> {
-
+  
   private requestTimeout: any;
-
+  
   constructor(props: any) {
     super(props);
     this.state = {
@@ -28,7 +32,8 @@ export default class CreateRepoPanel
         document: null
       },
       form2: {
-        document: {}
+        document: "",
+        outDocument: {}
       },
       form3: {
         name: "",
@@ -49,10 +54,10 @@ export default class CreateRepoPanel
     this.handleForm3Change = this.handleForm3Change.bind(this);
     this.handleForm2Error = this.handleForm2Error.bind(this);
   }
-
+  
   public render() {
-    const { finished, stepIndex } = this.state;
-    const contentStyle = { margin: "0 16px" };
+    const {finished, stepIndex} = this.state;
+    const contentStyle = {margin: "0 16px"};
     return (
       <div className="create-repo-panel">
         <AppBar
@@ -74,13 +79,14 @@ export default class CreateRepoPanel
         </div>
         <div>
           <div style={contentStyle}>
-            {finished ? (<p>Finished</p>) : (<div className="stepper-content">{this.getStepContent(stepIndex)}</div>)}
+            {finished ? (<div className="content-wrapper"><CircularProgress/></div>) : (
+              <div className="stepper-content">{this.getStepContent(stepIndex)}</div>)}
           </div>
         </div>
       </div>
     );
   }
-
+  
   private handleNext(event: any) {
     event.preventDefault();
     const stepIndex = this.state.stepIndex;
@@ -91,34 +97,80 @@ export default class CreateRepoPanel
       state.stepIndex = stepIndex + 1;
       state.finished = stepIndex >= 2;
       if (state.stepIndex === 1) {
-        state.form2.document = JSON.stringify(state.form1.document || {});
+        state.form2.document = state.form1.document ? documentService.stringifyDocument(state.form1.document) : "";
       } else if (state.stepIndex === 2) {
         if (state.form2.outDocument && state.form2.outDocument.info) {
           state.form3.name = state.form2.outDocument.info.title || "";
-          state.form3.tag = state.form2.outDocument.info.tag || "";
+          state.form3.tag = state.form2.outDocument.info.version || "";
         }
       }
       this.setState(state);
-
+      
       if (state.stepIndex === 0) {
         this.handleForm1Change();
       } else if (state.stepIndex === 1) {
         this.handleForm2Change();
       } else if (state.stepIndex === 2) {
         this.handleForm3Change();
+      } else if (state.stepIndex === 3) {
+        this.createRepo().then(repo => {
+          // todo
+        }).catch(e => {
+          let state: any = this.state;
+          state.submitError = "Failed to create repository: " + e.message;
+          state.stepIndex--;
+          state.finished = false;
+          this.setState(state);
+        });
       }
-
+      
     }
     return false;
   }
-
+  
+  private async createRepo(): Promise<void> {
+    if (this.state.form1.enableSync) {
+      let repo = await repoService.createSyncRepo(projectService.currentProject, this.state.form3.name,
+        this.state.form1.externalUrl);
+      routerService.history.push(`/api-docs/${projectService.currentProject.id}/repos/${repo.id}`);
+    } else {
+      let repo = await repoService.createRepo(projectService.currentProject, this.state.form3.name);
+      let refString = "";
+      if (this.state.form2.outDocument && Object.keys(this.state.form2.outDocument).length > 0) {
+        try {
+          let document = await documentService.createDocument(projectService.currentProject, repo,
+            this.state.form2.outDocument, this.state.form3.tag);
+          if (this.state.form3.tag) {
+            repo.tags = [{
+              id: this.state.form3.tag,
+              name: this.state.form3.tag,
+              ref: document.id
+            }];
+            repo.latestTag = this.state.form3.tag;
+          } else {
+            refString = "?ref=" + document.id;
+          }
+        } catch (e) {
+          // Rollback
+          try {
+            await repoService.deleteRepo(projectService.currentProject, repo.id);
+          } catch (ee) {
+            // do nothing
+          }
+          throw e;
+        }
+      }
+      routerService.history.push(`/api-docs/${projectService.currentProject.id}/repos/${repo.id}`);
+    }
+  }
+  
   private handlePrev() {
     const stepIndex = this.state.stepIndex;
     if (stepIndex > 0) {
-      this.setState({ stepIndex: stepIndex - 1 });
+      this.setState({stepIndex: stepIndex - 1});
     }
   }
-
+  
   private handleForm3Change(event?: any, newValue?: any) {
     let state = this.state as any;
     if (event) {
@@ -133,7 +185,7 @@ export default class CreateRepoPanel
       .filter(field => this.state.form3Errors[field] !== "").length === 0;
     this.setState(state);
   }
-
+  
   private handleForm1Change(event?: any, newValue?: any) {
     let state = this.state as any;
     if (event) {
@@ -155,15 +207,15 @@ export default class CreateRepoPanel
     }
     state.form1.document = null;
     this.setState(state);
-
+    
     if (state.form1.enableSync && state.form1.externalUrl) {
       this.fetchExternalDocument(state.form1.externalUrl);
     }
   }
-
+  
   private fetchExternalDocument(url: string) {
-    this.setState({ form1Loading: true });
-
+    this.setState({form1Loading: true});
+    
     if (this.requestTimeout) {
       clearInterval(this.requestTimeout);
     }
@@ -174,29 +226,29 @@ export default class CreateRepoPanel
             let state = this.state;
             state.form1.document = document;
             this.setState(state);
-            this.setState({ form1Loading: false, valid1: true });
+            this.setState({form1Loading: false, valid1: true});
           }).catch(e => {
             let state = this.state;
             state.form1Errors.externalUrl = "Failed to fetch document: " + e.message;
             this.setState(state);
-            this.setState({ form1Loading: false });
+            this.setState({form1Loading: false});
           });
         } else {
           let state = this.state;
           state.form1Errors.externalUrl =
             `Failed to fetch document: server responded with ${response.status} (${response.statusText})`;
           this.setState(state);
-          this.setState({ form1Loading: false });
+          this.setState({form1Loading: false});
         }
       }).catch(e => {
         let state = this.state;
         state.form1Errors.externalUrl = "Failed to fetch document: " + e.message;
         this.setState(state);
-        this.setState({ form1Loading: false });
+        this.setState({form1Loading: false});
       });
     }, 1000);
   }
-
+  
   private handleForm2Change(event?: any, newValue?: any) {
     let state = this.state as any;
     if (event) {
@@ -208,23 +260,23 @@ export default class CreateRepoPanel
       }
     }
     try {
-      state.form2.outDocument = JSON.parse(state.form2.document);
+      state.form2.outDocument = documentService.parseDocument(state.form2.document);
       state.form2Errors["document"] = "";
     } catch (e) {
-      state.form2Errors["document"] = "Invalid JSON";
+      state.form2Errors["document"] = "Invalid Json or Yaml";
     }
     state.valid2 = Object.keys(state.form2Errors)
       .filter(field => state.form2Errors[field] !== "").length === 0;
     this.setState(state);
   }
-
+  
   private handleForm2Error(error: string): void {
     let state = this.state as any;
     state.form2Errors.document = error;
     this.setState(state);
     this.handleForm2Change();
   }
-
+  
   private getStepContent(stepIndex: number) {
     switch (stepIndex) {
       case 0:
@@ -245,7 +297,7 @@ export default class CreateRepoPanel
                 value={this.state.form1.externalUrl}
                 hintText="http://petstore.swagger.io/v2/swagger.json"
                 onChange={this.handleForm1Change}
-                style={{ width: "100%" }}
+                style={{width: "100%"}}
                 required={true}
               />
             )}
@@ -283,7 +335,7 @@ export default class CreateRepoPanel
               <FlatButton
                 label="Back"
                 onClick={this.handlePrev}
-                style={{ marginRight: 12 }}
+                style={{marginRight: 12}}
               />
               <RaisedButton
                 type="submit"
@@ -314,15 +366,15 @@ export default class CreateRepoPanel
                 name="tag"
                 value={this.state.form3.tag}
                 onChange={this.handleForm3Change}
-                required={true}
               />
             </div>}
-
+            
             <div className="stepper-controls">
+              <div className="error-label" style={{color: red500}}>{this.state.submitError}</div>
               <FlatButton
                 label="Back"
                 onClick={this.handlePrev}
-                style={{ marginRight: 12 }}
+                style={{marginRight: 12}}
               />
               <RaisedButton
                 type="submit"
@@ -337,11 +389,11 @@ export default class CreateRepoPanel
         return "You're a long way from home sonny jim!";
     }
   }
-
+  
 }
 
 interface FormData {
-
+  
   valid1: boolean;
   valid2: boolean;
   valid3: boolean;
@@ -351,18 +403,20 @@ interface FormData {
   form2Errors: { [field: string]: string };
   form3Errors: { [field: string]: string };
   form1Loading?: any;
-
+  submitError?: string;
+  
   form1: {
     enableSync: boolean;
     externalUrl: string;
     document: any;
   };
   form2: {
-    document: any
+    document: string;
+    outDocument: any;
   };
   form3: {
     name: string;
     tag: string;
   };
-
+  
 }

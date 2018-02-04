@@ -5,5 +5,7 @@ import { Repo } from "../domain/repo.model";
 export interface DocumentClient {
 
   getDocument(project: Project, repo: Repo, documentId: string): Promise<Document>;
+  
+  createDocument(project: Project, repo: Repo, document: Document, tag?: string): Promise<Document>;
 
 }

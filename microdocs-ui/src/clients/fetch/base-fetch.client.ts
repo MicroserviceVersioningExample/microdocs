@@ -1,16 +1,16 @@
-import { config } from "../../config/index";
-import { Context } from "../../context";
-import { Token } from "../../domain/token.model";
+import {config} from "../../config/index";
+import {Context} from "../../context";
+import {Token} from "../../domain/token.model";
 
 export abstract class BaseFetchClient {
-
+  
   protected async request(method: string, path: string, options: RequestInit = {}): Promise<Response> {
     let url = config.baseUrl + path;
-    let requestOptions = { ...options, method };
+    let requestOptions = {...options, method};
     if (!requestOptions.headers) {
       requestOptions.headers = {};
     }
-
+    
     // Set Authorization header
     try {
       let token = await this.getToken();
@@ -18,22 +18,34 @@ export abstract class BaseFetchClient {
     } catch (e) {
       // ignore error
     }
-
+    
     // Make request
     let response = await fetch(url, requestOptions);
-
+    
     if (response.status === 401) {
       // reset token
       Context.token = null;
       let token = await this.getToken();
       (requestOptions.headers as any)["Authorization"] = "Bearer " + token;
-
+      
       // Retry request
-      return fetch(url, requestOptions);
+      response = await fetch(url, requestOptions);
     }
+    await this.checkForError(response);
     return response;
   }
-
+  
+  private async checkForError(response: Response): Promise<void> {
+    if (response.status >= 400) {
+      let body = await response.json();
+      if (body.message) {
+        throw new Error(body.message);
+      } else {
+        throw new Error("Server responded with: " + response.statusText);
+      }
+    }
+  }
+  
   /**
    * Get access token
    * @returns {Promise<string>}
@@ -56,7 +68,7 @@ export abstract class BaseFetchClient {
     }
     return context.token;
   }
-
+  
   /**
    * Request new token with a refresh token
    * @param {string} refreshToken
@@ -66,7 +78,7 @@ export abstract class BaseFetchClient {
     let formData = new FormData();
     formData.append("grant_type", "refresh_token");
     formData.append("refresh_token", refreshToken);
-
+    
     let response = await fetch("", {
       method: "POST",
       headers: {
@@ -77,5 +89,5 @@ export abstract class BaseFetchClient {
     let json = await response.json();
     return json as Token;
   }
-
+  
 }

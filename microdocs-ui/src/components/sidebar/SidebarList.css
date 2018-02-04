@@ -8,6 +8,11 @@
 
 .repo-list {
   flex: 2;
+  position: absolute;
+  width: 100%;
+  bottom: 65px;
+  top: 112px;
+  overflow: auto;
 }
 
 .project-list {

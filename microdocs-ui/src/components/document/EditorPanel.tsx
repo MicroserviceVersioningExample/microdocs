@@ -1,39 +1,39 @@
 import * as React from "react";
 import AceEditor from "react-ace";
-import { Document } from "../../domain/document.model";
+import {Document} from "../../domain/document.model";
 import DocumentPanel from "./DocumentPanel";
 import "./EditorPanel.css";
+
+const yaml: any = require("yaml-js");
 
 import * as ace from "brace";
 import "brace/ext/language_tools";
 import "brace/ext/searchbox";
 import "brace/mode/yaml";
 import "brace/theme/tomorrow_night_eighties";
+import {documentService} from "../../services";
 // import "./brace-snippets-yaml";
 
 export default class EditorPanel
   extends React.Component<EditorPanelProps, { document: Document, rawDocument: string, error: string }> {
-
+  
   public readonly name: string;
-
+  
   constructor(props: EditorPanelProps) {
     super(props);
     this.name = props.name;
-
+    
     this.state = {
       error: "",
-      document: this.parseDocument(props.document),
-      rawDocument: this.formatDocument(this.props.document)
+      document: documentService.parseDocument(props.document),
+      rawDocument: documentService.formatDocument(this.props.document)
     };
-
-    this.props.onChange({ target: this }, props.document);
-
+    
+    this.props.onChange({target: this}, props.document);
+    
     this.handleChange = this.handleChange.bind(this);
-    this.formatDocument = this.formatDocument.bind(this);
-    this.stringifyDocument = this.stringifyDocument.bind(this);
-    this.parseDocument = this.parseDocument.bind(this);
   }
-
+  
   public render() {
     return (
       <div className={"editor-panel " + (this.props.className || "")}>
@@ -74,46 +74,30 @@ export default class EditorPanel
       </div>
     );
   }
-
+  
   private handleChange(newValue?: string): any {
-    let document = this.parseDocument(newValue);
-    this.props.onChange({ target: this }, newValue);
-    this.setState({ rawDocument: newValue });
+    let document = documentService.parseDocument(newValue);
+    this.props.onChange({target: this}, newValue);
+    this.setState({rawDocument: newValue});
     if (document) {
-      this.setState({ document, error: "" });
+      this.setState({document, error: ""});
     } else {
-      this.setState({ error: "Invalid JSON" });
+      this.setState({error: "Invalid JSON"});
       this.props.onError("Invalid JSON");
     }
   }
-
-  private formatDocument(rawDocument: string): string {
-    return this.stringifyDocument(this.parseDocument(rawDocument));
-  }
-
-  private stringifyDocument(document: Document): string {
-    return JSON.stringify(document, undefined, 2);
-  }
-
-  private parseDocument(value: string): Document {
-    try {
-      return JSON.parse(value) as Document;
-    } catch (e) {
-      return null;
-    }
-  }
-
+  
 }
 
 export interface EditorPanelProps {
-
+  
   document: string;
   className?: string;
   readOnly?: boolean;
   name?: string;
   onChange?: (event: any, document: string) => void;
   onError?: (error: string) => void;
-
+  
 }
 
 // nieuwlied bad beatchhous

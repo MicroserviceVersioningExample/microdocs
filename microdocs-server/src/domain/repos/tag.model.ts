@@ -32,7 +32,7 @@ export class Tag extends BaseModel<TagOptions> {
 
 export interface TagOptions extends BaseOptions {
 
-  taggedOn: string;
+  taggedOn?: string;
   ref: string;
 
 }

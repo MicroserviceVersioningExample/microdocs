@@ -20,7 +20,8 @@ export class WebConfig {
     const app = createExpressServer({
       cors: true,
       controllers: [__dirname + "/../controllers/**/*.controller.js"],
-      middlewares: [__dirname + "/../middlewares/**/*.middleware.js"]
+      middlewares: [__dirname + "/../middlewares/**/*.middleware.js"],
+      defaultErrorHandler: false
     });
 
     app.use(bodyParser.json());

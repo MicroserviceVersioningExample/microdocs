@@ -11,7 +11,7 @@ export class ErrorMiddleware implements ExpressErrorMiddlewareInterface {
       message: error.message,
       path: request.path
     };
-    if (error instanceof ValidationException) {
+    if (error instanceof ValidationException || error.validationError) {
       body.status = 400;
       body.errors = (error as ValidationException).errors;
     }

@@ -2,3 +2,7 @@
 .tag-field hr {
     display: none !important;
 }
+
+.repo-controls {
+    padding-top: 29px;
+}

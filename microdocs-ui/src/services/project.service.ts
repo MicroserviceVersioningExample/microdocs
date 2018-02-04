@@ -58,6 +58,10 @@ export class ProjectService {
   public get selectedProject(): Observable<Project> {
     return this.selectedProjectStream;
   }
+  
+  public get currentProject(): Project {
+    return this.selectedProjectStream.getValue();
+  }
 
   public setSelectedProject(project: Project): void {
     if (this.selectedProjectStream.value !== project) {
