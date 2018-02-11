@@ -15,9 +15,9 @@ export function generateApiRoutes(express: Express.Application, modelFactory: Mo
         let pageSize = req.query.page_size || 50;
         let page = req.query.page || 0;
         let searchOptions: any = {
-          include_docs: true,
           limit: pageSize,
-          skip: page * pageSize
+          skip: page * pageSize,
+          selector: {}
         };
 
         if (req.params && Object.keys(req.params).length > 0) {
@@ -25,13 +25,17 @@ export function generateApiRoutes(express: Express.Application, modelFactory: Mo
         }
 
         collection.db.find(searchOptions).then((docs: any) => {
+          console.info(docs);
           res.json({
             page,
             pageSize,
             total: Math.ceil(docs.total_rows / pageSize),
-            items: docs.rows.map(row => row.doc)
+            items: docs.docs.map(row => row.doc)
           });
-        }).catch(next);
+        }).catch(e => {
+          winston.error(e);
+          next(e);
+        });
       });
 
     express.post(`${getPath(collection)}`,

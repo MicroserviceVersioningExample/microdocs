@@ -11,7 +11,7 @@ export * from "./document.model";
 function merge(o1, o2): any {
   Object.keys(o2).forEach(key => {
     let value = o2[key];
-    if (typeof(value) === "object") {
+    if (typeof(value) === "object" && o1[key]) {
       value = merge(o1[key], value);
     }
     o1[key] = value;
