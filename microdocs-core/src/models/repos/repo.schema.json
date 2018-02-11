@@ -1,0 +1,61 @@
+{
+  "type": "object",
+  "$id": "repo",
+  "title": "Repository",
+  "description": "Repository Model",
+  "$schema": "http://json-schema.org/draft-06/schema#",
+  "additionalProperties": false,
+  "properties": {
+    "_id": {
+      "$id": "/properties/_id",
+      "title": "Id",
+      "description": "Id",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$",
+      "maxLength": 20,
+      "required": true
+    },
+    "name": {
+      "$id": "/properties/name",
+      "title": "Name",
+      "description": "Repository Name",
+      "type": "string",
+      "maxLength": 32
+    },
+    "projectId": {
+      "$id": "/properties/projectId",
+      "title": "Project Id",
+      "description": "The project Id that this repository belongs to",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$",
+      "maxLength": 20,
+      "required": true
+    },
+    "type": {
+      "$id": "/properties/type",
+      "title": "Type",
+      "description": "Repository Type",
+      "type": "enum",
+      "enums": [
+        "static",
+        "sync"
+      ],
+      "required": true
+    },
+    "latestTag": {
+      "$id": "/properties/latestTag",
+      "title": "Latest Tag",
+      "description": "The latest published tag",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$",
+      "maxLength": 20
+    },
+    "externalUrl": {
+      "$id": "/properties/externalUrl",
+      "title": "External Url",
+      "description": "Url to periodically import an external document",
+      "type": "string",
+      "format": "url"
+    }
+  }
+}

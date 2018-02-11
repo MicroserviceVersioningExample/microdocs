@@ -1,0 +1,23 @@
+{
+  "type": "object",
+  "$id": "project",
+  "description": "Project model",
+  "$schema": "http://json-schema.org/draft-06/schema#",
+  "additionalProperties": false,
+  "properties": {
+    "_id": {
+      "$id": "/properties/_id",
+      "type": "string",
+      "title": "Id",
+      "pattern": "^[a-z][a-z0-9-]*$",
+      "maxLength": 20,
+      "required": true
+    },
+    "name": {
+      "$id": "/properties/name",
+      "type": "string",
+      "title": "Name",
+      "maxLength": 32
+    }
+  }
+}

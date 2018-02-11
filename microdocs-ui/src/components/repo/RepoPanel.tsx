@@ -11,6 +11,7 @@ import EditorInsertDriveFile from "material-ui/svg-icons/editor/insert-drive-fil
 import ImageEdit from "material-ui/svg-icons/image/edit";
 import MoreVertIcon from "material-ui/svg-icons/navigation/more-vert";
 import * as React from "react";
+import { Route, Switch } from "react-router";
 import { Subscription } from "rxjs/Subscription";
 import {documentService, loggerService, projectService, repoService, routerService} from "../../services";
 import DocumentPanel from "../document/DocumentPanel";
@@ -133,6 +134,7 @@ export default class RepoPanel extends React.Component<any, any> {
             
           </ToolbarGroup>
         </Toolbar>
+
         {this.state.error && (<div className="error-panel">
           <span>{this.state.error}</span>
         </div>)}

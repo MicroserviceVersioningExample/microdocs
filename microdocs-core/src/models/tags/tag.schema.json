@@ -1,0 +1,44 @@
+{
+  "type": "object",
+  "$id": "tag",
+  "title": "Tag",
+  "description": "Tag <pde;",
+  "$schema": "http://json-schema.org/draft-06/schema#",
+  "additionalProperties": false,
+  "properties": {
+    "_id": {
+      "$id": "/properties/_id",
+      "title": "Id",
+      "description": "Id",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$",
+      "maxLength": 20,
+      "required": true
+    },
+    "projectId": {
+      "$id": "/properties/projectId",
+      "title": "Project Id",
+      "description": "The project Id that this tag belongs to",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$",
+      "maxLength": 20,
+      "required": true
+    },
+    "repoId": {
+      "$id": "/properties/repoId",
+      "title": "Repository Id",
+      "description": "The repository Id that this tag belongs to",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$",
+      "maxLength": 20,
+      "required": true
+    },
+    "taggedOn": {
+      "$id": "/properties/taggedOn",
+      "title": "Tagged On",
+      "description": "Datetime when this tagged was last create/edited",
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}
