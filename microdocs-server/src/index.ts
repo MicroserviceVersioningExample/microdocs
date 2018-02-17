@@ -6,28 +6,13 @@ import {
   Tag, TagSanitizer, TagSchema } from "@maxxton/microdocs-core";
 import * as bodyParser from "body-parser";
 import * as express from "express";
-import * as ExpressPouchDB from "express-pouchdb";
-import * as PouchDB from "pouchdb";
-import * as HttpAdapter from "pouchdb-adapter-http";
-import * as MemoryAdapter from "pouchdb-adapter-memory";
-import * as PourchDBFind from "pouchdb-find";
 import * as winston from "winston";
-import { generateApiRoutes } from "./api.factory";
-
-PouchDB.plugin(HttpAdapter);
-PouchDB.plugin(MemoryAdapter);
-PouchDB.plugin(PourchDBFind);
+import { createCollection } from "./models/model.factory";
 
 let app = express();
 app.use(bodyParser.json());
 
-let httpDB = PouchDB.defaults({ adapter: "http" });
-
-const modelFactory = new ModelFactory(httpDB, {
-  remoteURL: "http://localhost:5984"
-});
-
-let projectsCollection = modelFactory.createCollection<Project>("projects", {
+let projectsCollection = createCollection<Project>("projects", {
   schema: ProjectSchema
 });
 
