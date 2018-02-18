@@ -1,21 +1,22 @@
 import * as Express from "express";
 import { Schema } from "jsonschema";
 import { Db } from "mongodb";
+import {createController} from "../controllers/controller.factory";
 import { CollectionModel } from "../models/collection.model";
+import {createRepository} from "../repositories/repository.factory";
 import { Service } from "../services/service.model";
-import { createController } from "./api.factory";
-import { createRepository } from "./repository.factory";
 
 const collections: CollectionModel[] = [];
 
 export async function createCollection<T>(name: string, options: ModelOptions): Promise<CollectionModel<T>> {
   let collection: CollectionModel<T> = {
-    name
+    name,
+    schema: options.schema
   };
-  if (parent) {
-    let parentCollection = getCollection(name);
+  if (options.parent) {
+    let parentCollection = getCollection(options.parent);
     if (!parentCollection) {
-      throw new Error("Unknown parent collection: " + parent);
+      throw new Error("Unknown parent collection: " + options.parent);
     }
     collection.parent = parentCollection;
   }
@@ -24,6 +25,7 @@ export async function createCollection<T>(name: string, options: ModelOptions): 
   await createRepository(collection, options.database);
   createController(options.express, collection);
 
+  collections.push(collection);
   return collection;
 }
 

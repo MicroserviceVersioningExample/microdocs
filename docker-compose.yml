@@ -1,0 +1,42 @@
+
+version: '3'
+services:
+  core-watch:
+    image: microdocs-core:dev
+    build:
+      context: microdocs-core
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./microdocs-core/src:/app/src:ro
+      - ./microdocs-core/dist:/app/dist
+  service-watch:
+    image: microdocs-server:dev
+    build:
+      context: .
+      dockerfile: microdocs-server/Dockerfile.dev
+    volumes:
+      - ./microdocs-core/dist:/app/microdocs-core/dist:ro
+      - ./microdocs-server/src:/app/microdocs-server/src:ro
+      - ./microdocs-server/dist:/app/microdocs-server/dist
+    depends_on:
+      - core-watch
+  service-run:
+    image: microdocs-server:dev
+    build:
+      context: .
+      dockerfile: microdocs-server/Dockerfile.dev
+    volumes:
+      - ./microdocs-core/dist:/app/microdocs-core/dist:ro
+      - ./microdocs-server/dist:/app/microdocs-server/dist
+    environment:
+      - 'MONGO_URL=mongodb://db:27017'
+    command: ./node_modules/.bin/nodemon --inspect ./dist/index.js
+    ports:
+      - 3000:3000
+    depends_on:
+      - db
+      - service-watch
+  db:
+    image: mongo:3.6.2
+    ports:
+      - 27017:27017

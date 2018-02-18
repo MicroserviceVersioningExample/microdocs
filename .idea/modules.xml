@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/microdocs.iml" filepath="$PROJECT_DIR$/microdocs.iml" />
+      <module fileurl="file://$PROJECT_DIR$/microdocs-core/microdocs-core.iml" filepath="$PROJECT_DIR$/microdocs-core/microdocs-core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/microdocs-server/microdocs-server.iml" filepath="$PROJECT_DIR$/microdocs-server/microdocs-server.iml" />
+      <module fileurl="file://$PROJECT_DIR$/microdocs-ui/microdocs-ui.iml" filepath="$PROJECT_DIR$/microdocs-ui/microdocs-ui.iml" />
+    </modules>
+  </component>
+</project>
